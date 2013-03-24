@@ -27,13 +27,12 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.widget.ArrayAdapter;
-import android.widget.ListView;
 
-import com.actionbarsherlock.app.SherlockActivity;
+import com.actionbarsherlock.app.SherlockFragmentActivity;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
 import com.geekhub.exam.R;
-import com.geekhub.exam.utils.API.AsyncTasks.AsyncLoadTasks;
+import com.geekhub.exam.fragments.TasksFragment;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.api.client.extensions.android.http.AndroidHttp;
 import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential;
@@ -42,7 +41,7 @@ import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.gson.GsonFactory;
 import com.google.api.services.tasks.TasksScopes;
 
-public final class MainActivity extends SherlockActivity {
+public final class MainActivity extends SherlockFragmentActivity {
 
 	private static final Level LOGGING_LEVEL = Level.OFF;
 
@@ -66,18 +65,17 @@ public final class MainActivity extends SherlockActivity {
 
 	ArrayAdapter<String> adapter;
 
-	public com.google.api.services.tasks.Tasks service;
+	public static com.google.api.services.tasks.Tasks service;
 
 	public int numAsyncTasks;
 
-	private ListView listView;
+	//	private ListView listView;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		Logger.getLogger("com.google.api.client").setLevel(LOGGING_LEVEL);
-		setContentView(R.layout.calendarlist);
-		listView = (ListView) findViewById(R.id.list);
+		setContentView(R.layout.activity_main);
 
 		// Google Accounts
 		credential = GoogleAccountCredential.usingOAuth2(this, TasksScopes.TASKS);
@@ -85,25 +83,18 @@ public final class MainActivity extends SherlockActivity {
 		credential.setSelectedAccountName(settings.getString(PREF_ACCOUNT_NAME, null));
 
 		// Tasks client
-		service =
-				new com.google.api.services.tasks.Tasks.Builder(transport, jsonFactory, credential)
+		service = new com.google.api.services.tasks.Tasks.Builder(transport, jsonFactory, credential)
 		.setApplicationName("Google-TasksAndroid/1.0").build();
 	}
 
 	public void showGooglePlayServicesAvailabilityErrorDialog(final int connectionStatusCode) {
 		runOnUiThread(new Runnable() {
 			public void run() {
-				Dialog dialog =
-						GooglePlayServicesUtil.getErrorDialog(connectionStatusCode, MainActivity.this,
-								REQUEST_GOOGLE_PLAY_SERVICES);
+				Dialog dialog = GooglePlayServicesUtil.getErrorDialog(connectionStatusCode, MainActivity.this,
+						REQUEST_GOOGLE_PLAY_SERVICES);
 				dialog.show();
 			}
 		});
-	}
-
-	public void refreshView() {
-		adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, tasksList);
-		listView.setAdapter(adapter);
 	}
 
 	@Override
@@ -127,7 +118,7 @@ public final class MainActivity extends SherlockActivity {
 			break;
 		case REQUEST_AUTHORIZATION:
 			if (resultCode == Activity.RESULT_OK) {
-				AsyncLoadTasks.run(this);
+				startFragment();
 			} else {
 				chooseAccount();
 			}
@@ -141,7 +132,7 @@ public final class MainActivity extends SherlockActivity {
 					SharedPreferences.Editor editor = settings.edit();
 					editor.putString(PREF_ACCOUNT_NAME, accountName);
 					editor.commit();
-					AsyncLoadTasks.run(this);
+					startFragment();
 				}
 			}
 			break;
@@ -154,18 +145,18 @@ public final class MainActivity extends SherlockActivity {
 		return super.onCreateOptionsMenu(menu);
 	}
 
-		@Override
-		public boolean onOptionsItemSelected(MenuItem item) {
-			switch (item.getItemId()) {
-			case R.id.menu_refresh:
-				AsyncLoadTasks.run(this);
-				break;
-			case R.id.menu_accounts:
-				chooseAccount();
-				return true;
-			}
-			return super.onOptionsItemSelected(item);
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		switch (item.getItemId()) {
+		case R.id.menu_refresh:
+			startFragment();
+			break;
+		case R.id.menu_accounts:
+			chooseAccount();
+			return true;
 		}
+		return super.onOptionsItemSelected(item);
+	}
 
 	/** Check that Google Play services APK is installed and up to date. */
 	private boolean checkGooglePlayServicesAvailable() {
@@ -183,13 +174,17 @@ public final class MainActivity extends SherlockActivity {
 			// ask user to choose account
 			chooseAccount();
 		} else {
-			// load calendars
-			AsyncLoadTasks.run(this);
+			startFragment();
 		}
 	}
 
 	private void chooseAccount() {
 		startActivityForResult(credential.newChooseAccountIntent(), REQUEST_ACCOUNT_PICKER);
+	}
+
+	private void startFragment() {
+		getSupportFragmentManager().beginTransaction().add(R.id.list, new TasksFragment()).commit();
+
 	}
 
 }

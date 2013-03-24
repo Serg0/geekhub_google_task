@@ -31,19 +31,16 @@ abstract class CommonAsyncTask extends AsyncTask<Void, Void, Boolean> {
 
   final MainActivity activity;
   final com.google.api.services.tasks.Tasks client;
-  private final View progressBar;
 
   CommonAsyncTask(MainActivity activity) {
     this.activity = activity;
     client = activity.service;
-    progressBar = activity.findViewById(R.id.title_refresh_progress);
   }
 
   @Override
   protected void onPreExecute() {
     super.onPreExecute();
     activity.numAsyncTasks++;
-    progressBar.setVisibility(View.VISIBLE);
   }
 
   @Override
@@ -66,9 +63,6 @@ abstract class CommonAsyncTask extends AsyncTask<Void, Void, Boolean> {
   @Override
   protected final void onPostExecute(Boolean success) {
     super.onPostExecute(success);
-    if (0 == --activity.numAsyncTasks) {
-      progressBar.setVisibility(View.GONE);
-    }
     if (success) {
       activity.refreshView();
     }

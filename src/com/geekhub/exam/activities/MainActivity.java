@@ -15,6 +15,23 @@ package com.geekhub.exam.activities;
  */
 
 
+import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import android.accounts.AccountManager;
+import android.app.Activity;
+import android.app.Dialog;
+import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
+import android.os.Bundle;
+import android.widget.ArrayAdapter;
+import android.widget.ListView;
+
+import com.actionbarsherlock.app.SherlockActivity;
+import com.actionbarsherlock.view.Menu;
+import com.actionbarsherlock.view.MenuItem;
 import com.geekhub.exam.R;
 import com.geekhub.exam.utils.API.AsyncTasks.AsyncLoadTasks;
 import com.google.android.gms.common.GooglePlayServicesUtil;
@@ -25,172 +42,154 @@ import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.gson.GsonFactory;
 import com.google.api.services.tasks.TasksScopes;
 
-import android.accounts.AccountManager;
-import android.app.Activity;
-import android.app.Dialog;
-import android.content.Context;
-import android.content.Intent;
-import android.content.SharedPreferences;
-import android.os.Bundle;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
-import android.widget.ArrayAdapter;
-import android.widget.ListView;
+public final class MainActivity extends SherlockActivity {
 
-import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+	private static final Level LOGGING_LEVEL = Level.OFF;
 
-public final class MainActivity extends Activity {
+	private static final String PREF_ACCOUNT_NAME = "accountName";
 
-  private static final Level LOGGING_LEVEL = Level.OFF;
+	public static final String TAG = "TasksSample";
 
-  private static final String PREF_ACCOUNT_NAME = "accountName";
+	public static final int REQUEST_GOOGLE_PLAY_SERVICES = 0;
 
-  public static final String TAG = "TasksSample";
+	public static final int REQUEST_AUTHORIZATION = 1;
 
-  public static final int REQUEST_GOOGLE_PLAY_SERVICES = 0;
+	public static final int REQUEST_ACCOUNT_PICKER = 2;
 
-  public static final int REQUEST_AUTHORIZATION = 1;
+	final HttpTransport transport = AndroidHttp.newCompatibleTransport();
 
-  public static final int REQUEST_ACCOUNT_PICKER = 2;
+	final JsonFactory jsonFactory = new GsonFactory();
 
-  final HttpTransport transport = AndroidHttp.newCompatibleTransport();
+	GoogleAccountCredential credential;
 
-  final JsonFactory jsonFactory = new GsonFactory();
+	public List<String> tasksList;
 
-  GoogleAccountCredential credential;
+	ArrayAdapter<String> adapter;
 
-  public List<String> tasksList;
+	public com.google.api.services.tasks.Tasks service;
 
-  ArrayAdapter<String> adapter;
+	public int numAsyncTasks;
 
-  public com.google.api.services.tasks.Tasks service;
+	private ListView listView;
 
-  public int numAsyncTasks;
+	@Override
+	public void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		Logger.getLogger("com.google.api.client").setLevel(LOGGING_LEVEL);
+		setContentView(R.layout.calendarlist);
+		listView = (ListView) findViewById(R.id.list);
 
-  private ListView listView;
+		// Google Accounts
+		credential = GoogleAccountCredential.usingOAuth2(this, TasksScopes.TASKS);
+		SharedPreferences settings = getPreferences(Context.MODE_PRIVATE);
+		credential.setSelectedAccountName(settings.getString(PREF_ACCOUNT_NAME, null));
 
-  @Override
-  public void onCreate(Bundle savedInstanceState) {
-    super.onCreate(savedInstanceState);
-    Logger.getLogger("com.google.api.client").setLevel(LOGGING_LEVEL);
-    setContentView(R.layout.calendarlist);
-    listView = (ListView) findViewById(R.id.list);
-    
-    // Google Accounts
-    credential = GoogleAccountCredential.usingOAuth2(this, TasksScopes.TASKS);
-    SharedPreferences settings = getPreferences(Context.MODE_PRIVATE);
-    credential.setSelectedAccountName(settings.getString(PREF_ACCOUNT_NAME, null));
-    
-    // Tasks client
-    service =
-        new com.google.api.services.tasks.Tasks.Builder(transport, jsonFactory, credential)
-            .setApplicationName("Google-TasksAndroid/1.0").build();
-  }
+		// Tasks client
+		service =
+				new com.google.api.services.tasks.Tasks.Builder(transport, jsonFactory, credential)
+		.setApplicationName("Google-TasksAndroid/1.0").build();
+	}
 
-  public void showGooglePlayServicesAvailabilityErrorDialog(final int connectionStatusCode) {
-    runOnUiThread(new Runnable() {
-      public void run() {
-        Dialog dialog =
-            GooglePlayServicesUtil.getErrorDialog(connectionStatusCode, MainActivity.this,
-                REQUEST_GOOGLE_PLAY_SERVICES);
-        dialog.show();
-      }
-    });
-  }
+	public void showGooglePlayServicesAvailabilityErrorDialog(final int connectionStatusCode) {
+		runOnUiThread(new Runnable() {
+			public void run() {
+				Dialog dialog =
+						GooglePlayServicesUtil.getErrorDialog(connectionStatusCode, MainActivity.this,
+								REQUEST_GOOGLE_PLAY_SERVICES);
+				dialog.show();
+			}
+		});
+	}
 
-  public void refreshView() {
-    adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, tasksList);
-    listView.setAdapter(adapter);
-  }
+	public void refreshView() {
+		adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, tasksList);
+		listView.setAdapter(adapter);
+	}
 
-  @Override
-  protected void onResume() {
-    super.onResume();
-    if (checkGooglePlayServicesAvailable()) {
-      haveGooglePlayServices();
-    }
-  }
+	@Override
+	protected void onResume() {
+		super.onResume();
+		if (checkGooglePlayServicesAvailable()) {
+			haveGooglePlayServices();
+		}
+	}
 
-  @Override
-  protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-    super.onActivityResult(requestCode, resultCode, data);
-    switch (requestCode) {
-      case REQUEST_GOOGLE_PLAY_SERVICES:
-        if (resultCode == Activity.RESULT_OK) {
-          haveGooglePlayServices();
-        } else {
-          checkGooglePlayServicesAvailable();
-        }
-        break;
-      case REQUEST_AUTHORIZATION:
-        if (resultCode == Activity.RESULT_OK) {
-          AsyncLoadTasks.run(this);
-        } else {
-          chooseAccount();
-        }
-        break;
-      case REQUEST_ACCOUNT_PICKER:
-        if (resultCode == Activity.RESULT_OK && data != null && data.getExtras() != null) {
-          String accountName = data.getExtras().getString(AccountManager.KEY_ACCOUNT_NAME);
-          if (accountName != null) {
-            credential.setSelectedAccountName(accountName);
-            SharedPreferences settings = getPreferences(Context.MODE_PRIVATE);
-            SharedPreferences.Editor editor = settings.edit();
-            editor.putString(PREF_ACCOUNT_NAME, accountName);
-            editor.commit();
-            AsyncLoadTasks.run(this);
-          }
-        }
-        break;
-    }
-  }
+	@Override
+	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		super.onActivityResult(requestCode, resultCode, data);
+		switch (requestCode) {
+		case REQUEST_GOOGLE_PLAY_SERVICES:
+			if (resultCode == Activity.RESULT_OK) {
+				haveGooglePlayServices();
+			} else {
+				checkGooglePlayServicesAvailable();
+			}
+			break;
+		case REQUEST_AUTHORIZATION:
+			if (resultCode == Activity.RESULT_OK) {
+				AsyncLoadTasks.run(this);
+			} else {
+				chooseAccount();
+			}
+			break;
+		case REQUEST_ACCOUNT_PICKER:
+			if (resultCode == Activity.RESULT_OK && data != null && data.getExtras() != null) {
+				String accountName = data.getExtras().getString(AccountManager.KEY_ACCOUNT_NAME);
+				if (accountName != null) {
+					credential.setSelectedAccountName(accountName);
+					SharedPreferences settings = getPreferences(Context.MODE_PRIVATE);
+					SharedPreferences.Editor editor = settings.edit();
+					editor.putString(PREF_ACCOUNT_NAME, accountName);
+					editor.commit();
+					AsyncLoadTasks.run(this);
+				}
+			}
+			break;
+		}
+	}
 
-  @Override
-  public boolean onCreateOptionsMenu(Menu menu) {
-    MenuInflater inflater = getMenuInflater();
-    inflater.inflate(R.menu.main_menu, menu);
-    return super.onCreateOptionsMenu(menu);
-  }
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		getSupportMenuInflater().inflate(R.menu.main_menu, menu);
+		return super.onCreateOptionsMenu(menu);
+	}
 
-  @Override
-  public boolean onOptionsItemSelected(MenuItem item) {
-    switch (item.getItemId()) {
-      case R.id.menu_refresh:
-        AsyncLoadTasks.run(this);
-        break;
-      case R.id.menu_accounts:
-        chooseAccount();
-        return true;
-    }
-    return super.onOptionsItemSelected(item);
-  }
+		@Override
+		public boolean onOptionsItemSelected(MenuItem item) {
+			switch (item.getItemId()) {
+			case R.id.menu_refresh:
+				AsyncLoadTasks.run(this);
+				break;
+			case R.id.menu_accounts:
+				chooseAccount();
+				return true;
+			}
+			return super.onOptionsItemSelected(item);
+		}
 
-  /** Check that Google Play services APK is installed and up to date. */
-  private boolean checkGooglePlayServicesAvailable() {
-    final int connectionStatusCode = GooglePlayServicesUtil.isGooglePlayServicesAvailable(this);
-    if (GooglePlayServicesUtil.isUserRecoverableError(connectionStatusCode)) {
-      showGooglePlayServicesAvailabilityErrorDialog(connectionStatusCode);
-      return false;
-    }
-    return true;
-  }
+	/** Check that Google Play services APK is installed and up to date. */
+	private boolean checkGooglePlayServicesAvailable() {
+		final int connectionStatusCode = GooglePlayServicesUtil.isGooglePlayServicesAvailable(this);
+		if (GooglePlayServicesUtil.isUserRecoverableError(connectionStatusCode)) {
+			showGooglePlayServicesAvailabilityErrorDialog(connectionStatusCode);
+			return false;
+		}
+		return true;
+	}
 
-  private void haveGooglePlayServices() {
-    // check if there is already an account selected
-    if (credential.getSelectedAccountName() == null) {
-      // ask user to choose account
-      chooseAccount();
-    } else {
-      // load calendars
-      AsyncLoadTasks.run(this);
-    }
-  }
+	private void haveGooglePlayServices() {
+		// check if there is already an account selected
+		if (credential.getSelectedAccountName() == null) {
+			// ask user to choose account
+			chooseAccount();
+		} else {
+			// load calendars
+			AsyncLoadTasks.run(this);
+		}
+	}
 
-  private void chooseAccount() {
-    startActivityForResult(credential.newChooseAccountIntent(), REQUEST_ACCOUNT_PICKER);
-  }
+	private void chooseAccount() {
+		startActivityForResult(credential.newChooseAccountIntent(), REQUEST_ACCOUNT_PICKER);
+	}
 
 }

@@ -14,21 +14,16 @@
 
 package com.geekhub.exam.utils.API.AsyncTasks;
 
-import com.geekhub.exam.activities.TasksSample;
+import com.geekhub.exam.activities.MainActivity;
 import com.google.api.services.tasks.model.Task;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Asynchronously load the tasks.
- * 
- * @author Yaniv Inbar
- */
 public class AsyncLoadTasks extends CommonAsyncTask {
 
-	AsyncLoadTasks(TasksSample tasksSample) {
+	AsyncLoadTasks(MainActivity tasksSample) {
 		super(tasksSample);
 	}
 
@@ -47,7 +42,7 @@ public class AsyncLoadTasks extends CommonAsyncTask {
 		activity.tasksList = result;
 	}
 
-	public static void run(TasksSample tasksSample) {
+	public static void run(MainActivity tasksSample) {
 		new AsyncLoadTasks(tasksSample).execute();
 	}
 }

@@ -17,7 +17,7 @@
 package com.geekhub.exam.utils.API.AsyncTasks;
 
 import com.geekhub.exam.R;
-import com.geekhub.exam.activities.TasksSample;
+import com.geekhub.exam.activities.MainActivity;
 import com.geekhub.exam.utils.Utils;
 import com.google.api.client.googleapis.extensions.android.gms.auth.GooglePlayServicesAvailabilityIOException;
 import com.google.api.client.googleapis.extensions.android.gms.auth.UserRecoverableAuthIOException;
@@ -27,19 +27,13 @@ import android.view.View;
 
 import java.io.IOException;
 
-/**
- * Asynchronous task that also takes care of common needs, such as displaying progress,
- * authorization, exception handling, and notifying UI when operation succeeded.
- * 
- * @author Yaniv Inbar
- */
 abstract class CommonAsyncTask extends AsyncTask<Void, Void, Boolean> {
 
-  final TasksSample activity;
+  final MainActivity activity;
   final com.google.api.services.tasks.Tasks client;
   private final View progressBar;
 
-  CommonAsyncTask(TasksSample activity) {
+  CommonAsyncTask(MainActivity activity) {
     this.activity = activity;
     client = activity.service;
     progressBar = activity.findViewById(R.id.title_refresh_progress);
@@ -62,9 +56,9 @@ abstract class CommonAsyncTask extends AsyncTask<Void, Void, Boolean> {
           availabilityException.getConnectionStatusCode());
     } catch (UserRecoverableAuthIOException userRecoverableException) {
       activity.startActivityForResult(
-          userRecoverableException.getIntent(), TasksSample.REQUEST_AUTHORIZATION);
+          userRecoverableException.getIntent(), MainActivity.REQUEST_AUTHORIZATION);
     } catch (IOException e) {
-      Utils.logAndShow(activity, TasksSample.TAG, e);
+      Utils.logAndShow(activity, MainActivity.TAG, e);
     }
     return false;
   }

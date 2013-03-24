@@ -26,20 +26,8 @@ import android.content.res.Resources;
 import android.util.Log;
 import android.widget.Toast;
 
-/**
- * Common utilities.
- * 
- * @author Yaniv Inbar
- */
 public class Utils {
 
-  /**
-   * Logs the given throwable and shows an error alert dialog with its message.
-   * 
-   * @param activity activity
-   * @param tag log tag to use
-   * @param t throwable to log and show
-   */
   public static void logAndShow(Activity activity, String tag, Throwable t) {
     Log.e(tag, "Error", t);
     String message = t.getMessage();
@@ -54,25 +42,12 @@ public class Utils {
     showError(activity, message);
   }
 
-  /**
-   * Logs the given message and shows an error alert dialog with it.
-   * 
-   * @param activity activity
-   * @param tag log tag to use
-   * @param message message to log and show or {@code null} for none
-   */
   public static void logAndShowError(Activity activity, String tag, String message) {
     String errorMessage = getErrorMessage(activity, message);
     Log.e(tag, errorMessage);
     showErrorInternal(activity, errorMessage);
   }
 
-  /**
-   * Shows an error alert dialog with the given message.
-   * 
-   * @param activity activity
-   * @param message message to show or {@code null} for none
-   */
   public static void showError(Activity activity, String message) {
     String errorMessage = getErrorMessage(activity, message);
     showErrorInternal(activity, errorMessage);

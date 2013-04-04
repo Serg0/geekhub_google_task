@@ -17,27 +17,19 @@ public class GoogleTask {
 		this.service = service;
 	}
 
-	public GoogleTask(Tasks service, String taskListID) {
+	public GoogleTask(Tasks service, String taskListID) throws IOException {
 		if(service == null) throw new NullPointerException();
 		this.service = service;
-		try {
-			this.task = this.service.tasks().insert(taskListID, newTask()).execute();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+		this.task = this.service.tasks().insert(taskListID, newTask()).execute();
 	}
 
 	//create default instance of GoogleTask in default tasklist 
-	public GoogleTask(Tasks service) {
+	public GoogleTask(Tasks service) throws IOException {
 		if(service == null) throw new NullPointerException();
 		this.service = service;
-		try {
-			this.task = this.service.tasks().insert("@default", newTask()).execute();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+		this.task = this.service.tasks().insert("@default", newTask()).execute();
 	}
-	
+
 	//task checking for null
 	public boolean hasTask() {
 		return !this.task.isEmpty();
@@ -48,7 +40,7 @@ public class GoogleTask {
 		Task task = new Task();
 		task.setTitle("New Task");
 		task.setNotes("Please complete me");
-		task.setDue(new DateTime(System.currentTimeMillis() + 3600000));
+		task.setDue(new DateTime(System.currentTimeMillis() + 3600000));//magic
 		return task;
 	}
 
@@ -61,27 +53,32 @@ public class GoogleTask {
 	public Tasks getCurrentService() {
 		return this.service;
 	}
-		
+
 	//update current task in default tasklist
 	public void update(Task task) throws IOException {
 		this.service.tasks().update("@default", task.getId(), task).execute();
 	}
-	
+
 	//update current task by tasklist ID
 	public void update(String taskListID, Task task) throws IOException {
-		this.service.tasks().update(taskListID, taskListID, task).execute();
+		this.task = this.service.tasks().update(taskListID, task.getId(), task).execute();
 	}
-	
+
+	//update current task by tasklist ID
+	public void update(String taskListID) throws IOException {
+		this.task = this.service.tasks().update(taskListID, this.task.getId(), this.task).execute();
+	}
+
 	//delete current task in default tasklist
 	public void delete(Task task) throws IOException {
 		this.service.tasks().delete("@default", "taskID").execute();
 	}
-	
+
 	//delete current task by tasklist ID
 	public void delete(String taskListID, Task task) throws IOException {
 		this.service.tasks().delete(taskListID, "taskID").execute();
 	}
-	
+
 	//set current task to instance of GoogleTask class
 	public void setCurrentTask(Task task) {
 		this.task = task;

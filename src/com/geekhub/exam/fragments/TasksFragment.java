@@ -61,6 +61,26 @@ public class TasksFragment extends SherlockFragment{
 		} else {
 			result.add("No tasks.");
 		}
+
+		//		try {
+		//			com.google.api.services.tasks.Tasks.Tasklists.List list =	MainActivity.service.tasklists().list();
+		//			TaskLists taskLists = list.execute();
+		//			GoogleTaskLists tasks1 = new GoogleTaskLists(MainActivity.service);
+		//			Log.e("title name",((Integer)tasks1.getTitles().size()).toString());
+		//			Log.e("title name",tasks1.getTitles().get(0).toString());
+		//			Iterator<String> it = tasks1.getTitles().iterator();
+		//			MainActivity.service.tasks().list("@default")
+		//					.setFields("items/title").execute().
+		//			while(it.hasNext())				
+		//				Log.e("title name", it.next());
+		//			tasks1.delete(tasks1.getTitles().get(2));
+		//			if(tasks1.getGoogleTaskList("Klon")!=null)
+		//				Log.e("ID",tasks1.getGoogleTaskList("Klon").getTaskList().getId());
+		//		} catch (IOException e) {
+		// TODO Auto-generated catch block
+		//			e.printStackTrace();
+		//		}//list("@default")
+
 	}
 
 	private void updateUi() {
@@ -70,6 +90,7 @@ public class TasksFragment extends SherlockFragment{
 			@Override
 			public void run() {
 				listView.setAdapter(adapter);
+
 			}
 		});
 	}

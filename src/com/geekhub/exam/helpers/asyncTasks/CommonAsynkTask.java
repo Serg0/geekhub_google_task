@@ -37,8 +37,8 @@ import java.io.IOException;
  */
 abstract class CommonAsyncTask extends AsyncTask<Void, Void, Boolean> {
 
-  final MainActivity activity;
-  final com.google.api.services.tasks.Tasks client;
+  MainActivity activity;
+  com.google.api.services.tasks.Tasks client;
   private ProgressDialog progressBar;
 
   CommonAsyncTask(MainActivity activity) {
@@ -51,7 +51,7 @@ abstract class CommonAsyncTask extends AsyncTask<Void, Void, Boolean> {
   protected void onPreExecute() {
     super.onPreExecute();
     activity.numAsyncTasks++;
-    progressBar = ProgressDialog.show(activity,null,activity.getString(R.string.progress_dialog_processing),true, false);
+    progressBar = ProgressDialog.show(activity, null,activity.getString(R.string.progress_dialog_processing),true, false);
   }
 
   @Override

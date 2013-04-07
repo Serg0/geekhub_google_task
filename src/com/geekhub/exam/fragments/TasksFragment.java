@@ -32,6 +32,7 @@ public class TasksFragment extends SherlockFragment
 	private ListView listView;
 	List<String> result = null;
 	private List<Task> tasks;
+	private ArrayAdapter<String> resultAdapter;
 	
 	public static final String TASKLIST_DEFAULT_NAME = "@default";
 
@@ -76,7 +77,7 @@ public class TasksFragment extends SherlockFragment
 	void loadData() throws IOException {
 		result = new ArrayList<String>();
 		tasks = MainActivity.service.tasks().list("@default")
-				.setFields("items/title").execute().getItems();
+				/*.setFields("items")*/.execute().getItems();
 		if (tasks != null) {
 			for (Task task : tasks) {
 				result.add(task.getTitle());
@@ -108,7 +109,7 @@ public class TasksFragment extends SherlockFragment
 
 	private void updateUi() {
 		adapter = new ArrayAdapter<Task>(getSherlockActivity(), R.layout.list_menu_item_checkbox, tasks);
-
+//		resultAdapter = new ArrayAdapter<String>(getSherlockActivity(), R.layout.list_menu_item_checkbox, result);
 		getActivity().runOnUiThread(new Runnable() {
 			@Override
 			public void run() {

@@ -69,7 +69,7 @@ public class AsyncDeleteTask extends CommonAsyncTask {
 	@Override
 	protected void doInBackground() throws IOException {
 		for(Task task:tasks)
-			client.tasks().delete(taskListID, task.getTitle()).execute();
+			client.tasks().delete(taskListID, task.getId()).execute();
 	}
 
 	public static void run(MainActivity tasksSample, DeleteTaskCallBack callBack, List<Task> tasks) {

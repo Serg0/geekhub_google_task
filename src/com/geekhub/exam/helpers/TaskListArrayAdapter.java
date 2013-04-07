@@ -14,15 +14,14 @@ import android.widget.CheckBox;
 
 import com.google.api.client.json.JsonFactory;
 import com.google.api.services.tasks.model.Task;
-import com.google.api.services.tasks.model.Tasks;
 
 public class TaskListArrayAdapter extends ArrayAdapter<Task> {
 
-	private Tasks tasks;
+	private List<Task> tasks;
 	private Context context;
 
-	public TaskListArrayAdapter(Context context, Tasks tasks) {
-		super(context, R.layout.list_menu_item_checkbox, tasks.getItems());
+	public TaskListArrayAdapter(Context context, List<Task> tasks) {
+		super(context, R.layout.list_menu_item_checkbox, tasks);
 		this.tasks = tasks;
 		this.context = context;
 	}
@@ -31,7 +30,6 @@ public class TaskListArrayAdapter extends ArrayAdapter<Task> {
 	public View getView(int position, View convertView, ViewGroup parent) {
 
 		View row = convertView;
-		 String taskName;
 		
 		
 		if (row == null) {
@@ -40,16 +38,11 @@ public class TaskListArrayAdapter extends ArrayAdapter<Task> {
 			row = inflater.inflate(R.layout.list_menu_item_checkbox, parent,
 					false);
 		}
-		CheckBox checkbox = (CheckBox) row.findViewById(R.id.checkbox);
-		try {
-			taskName = tasks.getItems().get(position).toPrettyString();
-			checkbox.setText(taskName);
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-			 
 		
+		CheckBox checkbox = (CheckBox) row.findViewById(R.id.checkbox);
+		Task task  = tasks.get(position);
+		String taskName =	task.getTitle();
+		checkbox.setText(taskName);
 
 		return super.getView(position, convertView, parent);
 	}

@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import android.os.Bundle;
-import android.util.Log;
+import android.util.SparseBooleanArray;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -19,16 +19,16 @@ import com.actionbarsherlock.view.MenuInflater;
 import com.actionbarsherlock.view.MenuItem;
 import com.geekhub.exam.R;
 import com.geekhub.exam.activities.MainActivity;
-import com.geekhub.exam.google.GoogleTask;
 import com.geekhub.exam.helpers.asyncTasks.AsyncAddTask;
 import com.geekhub.exam.helpers.asyncTasks.AsyncAddTask.AddTaskCallBack;
+import com.geekhub.exam.helpers.asyncTasks.AsyncDeleteTask;
 import com.geekhub.exam.helpers.dialogs.NewTaskDialog;
 import com.google.api.services.tasks.model.Task;
 
 public class TasksFragment extends SherlockFragment
 					implements NewTaskDialog.DialogFinishListener{
 	View view;
-	ArrayAdapter<String> adapter;
+	ArrayAdapter<Task> adapter;
 	private ListView listView;
 	List<String> result = null;
 	private List<Task> tasks;
@@ -107,7 +107,7 @@ public class TasksFragment extends SherlockFragment
 	}
 
 	private void updateUi() {
-		adapter = new ArrayAdapter<String>(getSherlockActivity(), R.layout.list_menu_item_checkbox, result);
+		adapter = new ArrayAdapter<Task>(getSherlockActivity(), R.layout.list_menu_item_checkbox, tasks);
 
 		getActivity().runOnUiThread(new Runnable() {
 			@Override
@@ -136,8 +136,7 @@ public class TasksFragment extends SherlockFragment
 		}
 			
 		case R.id.delete:{
-			
-				feachureUnderConstruction();
+			deleteTasks();
 			return true;
 		}
 		case R.id.edit:{
@@ -159,6 +158,24 @@ public class TasksFragment extends SherlockFragment
 		return super.onOptionsItemSelected(item);
 	}
 
+	private void deleteTasks() {
+		// TODO Auto-generated method stub
+		
+		AsyncDeleteTask.DeleteTaskCallBack callBack = new AsyncDeleteTask.DeleteTaskCallBack() {
+			
+			@Override
+			public void getTask(List<Task> deletedTasks) {
+				tasks.removeAll(deletedTasks);
+				adapter.notifyDataSetChanged();
+			}
+		};
+		
+		AsyncDeleteTask.run(MainActivity.getInstance(), callBack, getChoosenItems());
+		
+	}
+
+
+
 	private void feachureUnderConstruction() {
 		Toast.makeText(getActivity(), "Feachure is under constraction!" , Toast.LENGTH_SHORT).show();
 		
@@ -172,22 +189,16 @@ public class TasksFragment extends SherlockFragment
 
 	@Override
 	public void onFinishDialogAddTask(String taskName) {
-		//TODO make add task processing
-		
-/*		try {
-			GoogleTask googleTask = new GoogleTask(MainActivity.service, getCurrentTaskList());
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}*/
+	
 		Task task = new Task();
+		
 		task.setTitle(taskName);
 		AddTaskCallBack callBack = new AddTaskCallBack() {
 			
 			@Override
 			public void getTask(Task task) {
 				if(adapter!=null){
-					adapter.add(task.getTitle());
+					adapter.add(task);
 					adapter.notifyDataSetChanged();
 					tasks.add(task);
 				}
@@ -197,26 +208,28 @@ public class TasksFragment extends SherlockFragment
 		
 		AsyncAddTask.run(MainActivity.getInstance(), callBack , task);
 		
-/*		new Thread(new Runnable() {
-		@Override
-		public void run() {
-			try {
-				
-					String taskId = MainActivity.service.tasks().insert(getCurrentTaskList(), task).execute().getId();
-				Log.d("insert", "taskId"+taskId);
-			} catch (Exception e) {
-				Log.d("insert", "e"+e.getMessage());
-				e.printStackTrace();
-			}
-	}
-	}).start();
-		Toast.makeText(getActivity(), "Added task "+ taskName , Toast.LENGTH_SHORT).show();*/
-		
 	}
 
 	private String getCurrentTaskList(){
-		//TODO add get current tasklist procedding
+		//TODO add get current tasklist processing
 		return TASKLIST_DEFAULT_NAME;
+	}
+	
+	private List<Task> getChoosenItems(){
+		
+		SparseBooleanArray sparseBooleanArray = listView.getCheckedItemPositions();
+		int cntChoice = listView.getCount();
+		List<Task> tasks = new ArrayList<Task>();
+		for(int i = 0; i < cntChoice; i++){
+			 
+            if(sparseBooleanArray.get(i)) {
+
+               tasks.add(this.tasks.get(i));
+
+            }
+		}
+		
+		return tasks;
 	}
 	
 }

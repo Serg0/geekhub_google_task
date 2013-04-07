@@ -30,38 +30,61 @@ import java.util.List;
  * 
  * @author Yaniv Inbar
  */
-public class AsyncLoadTasks extends CommonAsyncTask {
+public class AsyncDeleteTask extends CommonAsyncTask {
 
 	private List<Task> tasks;
-	private LoadTasksCallBack callBack;
+	private DeleteTaskCallBack callBack;
 	private String taskListID = Constants.DEFAULT_KEY;
 	
-	AsyncLoadTasks(MainActivity activity, LoadTasksCallBack callBack, String taskListID) {
+	AsyncDeleteTask(MainActivity activity, DeleteTaskCallBack callBack, List<Task> tasks) {
+		this(activity, callBack);
+		this.tasks = tasks;
+	}
+	
+	AsyncDeleteTask(MainActivity activity, DeleteTaskCallBack callBack, Task task) {
+		this(activity, callBack);
+		this.tasks = new ArrayList<Task>();
+		tasks.add(task);
+	}
+	
+	AsyncDeleteTask(MainActivity activity, DeleteTaskCallBack callBack, String taskListID, List<Task> tasks) {
 		this(activity, callBack);
 		this.taskListID = taskListID;
+		this.tasks = tasks;
 	}
-	AsyncLoadTasks(MainActivity activity, LoadTasksCallBack callBack) {
+	
+	AsyncDeleteTask(MainActivity activity, DeleteTaskCallBack callBack, String taskListID, Task task) {
+		this(activity, callBack);
+		this.taskListID = taskListID;
+		this.tasks = new ArrayList<Task>();
+		tasks.add(task);
+	}
+	
+	AsyncDeleteTask(MainActivity activity, DeleteTaskCallBack callBack) {
 		super(activity);
 		this.callBack = callBack;
+		
 	}
 
 	@Override
 	protected void doInBackground() throws IOException {
-		tasks = client.tasks().list(taskListID)
-				.setFields("items/title/ID").execute().getItems();
+		for(Task task:tasks)
+			client.tasks().delete(taskListID, task.getTitle()).execute();
 	}
 
-	public static void run(MainActivity tasksSample,LoadTasksCallBack callBack) {
-		new AsyncLoadTasks(tasksSample, callBack).execute();
+	public static void run(MainActivity tasksSample, DeleteTaskCallBack callBack, List<Task> tasks) {
+		new AsyncDeleteTask(tasksSample, callBack, tasks).execute();
 	}
 
 	@Override
 	protected void onSuccess() throws IOException {
 		if(callBack != null)
-			callBack.getTasks(tasks);
+			callBack.getTask(tasks);
 	}
-	public interface LoadTasksCallBack{
-		void getTasks(List<Task> tasks);
+	
+	public interface DeleteTaskCallBack{
+		void getTask(List<Task> tasks);
 		
 	}
-}
+	
+	}

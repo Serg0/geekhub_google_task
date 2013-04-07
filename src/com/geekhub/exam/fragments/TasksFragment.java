@@ -5,27 +5,44 @@ import java.util.ArrayList;
 import java.util.List;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import com.actionbarsherlock.app.SherlockFragment;
+import com.actionbarsherlock.view.Menu;
+import com.actionbarsherlock.view.MenuInflater;
+import com.actionbarsherlock.view.MenuItem;
 import com.geekhub.exam.R;
 import com.geekhub.exam.activities.MainActivity;
+import com.geekhub.exam.google.GoogleTask;
+import com.geekhub.exam.helpers.asyncTasks.AsyncAddTask;
+import com.geekhub.exam.helpers.asyncTasks.AsyncAddTask.AddTaskCallBack;
+import com.geekhub.exam.helpers.dialogs.NewTaskDialog;
 import com.google.api.services.tasks.model.Task;
 
-public class TasksFragment extends SherlockFragment{
+public class TasksFragment extends SherlockFragment
+					implements NewTaskDialog.DialogFinishListener{
 	View view;
 	ArrayAdapter<String> adapter;
 	private ListView listView;
 	List<String> result = null;
+	private List<Task> tasks;
+	
+	public static final String TASKLIST_DEFAULT_NAME = "@default";
 
 	@Override
 	public void onCreate(Bundle savedInstanceState){
 		super.onCreate(savedInstanceState);
+		setHasOptionsMenu(true);
+		
 	}
+
+	
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, 
@@ -37,6 +54,7 @@ public class TasksFragment extends SherlockFragment{
 	@Override
 	public void onActivityCreated(Bundle savedISnstanceState) {
 		super.onActivityCreated(savedISnstanceState);
+		initViews();
 		new Thread(new Runnable() {
 			@Override
 			public void run() {
@@ -50,9 +68,14 @@ public class TasksFragment extends SherlockFragment{
 		}).start();
 	}
 
+	private void initViews() {
+		listView = (ListView) view.findViewById(R.id.list_tasts);
+		listView.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE);
+		
+	}
 	void loadData() throws IOException {
 		result = new ArrayList<String>();
-		List<Task> tasks = MainActivity.service.tasks().list("@default")
+		tasks = MainActivity.service.tasks().list("@default")
 				.setFields("items/title").execute().getItems();
 		if (tasks != null) {
 			for (Task task : tasks) {
@@ -84,17 +107,116 @@ public class TasksFragment extends SherlockFragment{
 	}
 
 	private void updateUi() {
-		adapter = new ArrayAdapter<String>(getSherlockActivity(), R.layout.item, result);
-		listView = (ListView) view.findViewById(R.id.list_tasts);
-		getSherlockActivity().runOnUiThread(new Runnable() {
+		adapter = new ArrayAdapter<String>(getSherlockActivity(), R.layout.list_menu_item_checkbox, result);
+
+		getActivity().runOnUiThread(new Runnable() {
 			@Override
 			public void run() {
 				listView.setAdapter(adapter);
 
 			}
 		});
+		
 	}
 
 	public void refreshView() {}
 
+	@Override
+	public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+		inflater.inflate(R.menu.task_list_menu, menu);
+		super.onCreateOptionsMenu(menu, inflater);
+	}
+	
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		switch (item.getItemId()) {
+		case R.id.add:{
+			addNewTask();
+			return true;
+		}
+			
+		case R.id.delete:{
+			
+				feachureUnderConstruction();
+			return true;
+		}
+		case R.id.edit:{
+
+				feachureUnderConstruction();
+			return true;
+		}
+		case R.id.complete:{
+
+				feachureUnderConstruction();
+			return true;
+		}
+
+		default:
+			break;
+		}
+		
+		
+		return super.onOptionsItemSelected(item);
+	}
+
+	private void feachureUnderConstruction() {
+		Toast.makeText(getActivity(), "Feachure is under constraction!" , Toast.LENGTH_SHORT).show();
+		
+	}
+
+	private void addNewTask() {
+		NewTaskDialog newTaskDialog = new NewTaskDialog(this);
+		newTaskDialog.show(getFragmentManager(), getTag());
+		
+	}
+
+	@Override
+	public void onFinishDialogAddTask(String taskName) {
+		//TODO make add task processing
+		
+/*		try {
+			GoogleTask googleTask = new GoogleTask(MainActivity.service, getCurrentTaskList());
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}*/
+		Task task = new Task();
+		task.setTitle(taskName);
+		AddTaskCallBack callBack = new AddTaskCallBack() {
+			
+			@Override
+			public void getTask(Task task) {
+				if(adapter!=null){
+					adapter.add(task.getTitle());
+					adapter.notifyDataSetChanged();
+					tasks.add(task);
+				}
+				
+			}
+		};
+		
+		AsyncAddTask.run(MainActivity.getInstance(), callBack , task);
+		
+/*		new Thread(new Runnable() {
+		@Override
+		public void run() {
+			try {
+				
+					String taskId = MainActivity.service.tasks().insert(getCurrentTaskList(), task).execute().getId();
+				Log.d("insert", "taskId"+taskId);
+			} catch (Exception e) {
+				Log.d("insert", "e"+e.getMessage());
+				e.printStackTrace();
+			}
+	}
+	}).start();
+		Toast.makeText(getActivity(), "Added task "+ taskName , Toast.LENGTH_SHORT).show();*/
+		
+	}
+
+	private String getCurrentTaskList(){
+		//TODO add get current tasklist procedding
+		return TASKLIST_DEFAULT_NAME;
+	}
+	
 }

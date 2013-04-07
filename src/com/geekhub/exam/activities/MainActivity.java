@@ -69,6 +69,8 @@ public final class MainActivity extends SherlockFragmentActivity {
 
 	public int numAsyncTasks;
 
+	private static MainActivity instance;
+
 	//	private ListView listView;
 
 	@Override
@@ -77,6 +79,7 @@ public final class MainActivity extends SherlockFragmentActivity {
 		Logger.getLogger("com.google.api.client").setLevel(LOGGING_LEVEL);
 		setContentView(R.layout.activity_main);
 
+		instance = this;
 		// Google Accounts
 		credential = GoogleAccountCredential.usingOAuth2(this, TasksScopes.TASKS);
 		SharedPreferences settings = getPreferences(Context.MODE_PRIVATE);
@@ -85,6 +88,10 @@ public final class MainActivity extends SherlockFragmentActivity {
 		// Tasks client
 		service = new com.google.api.services.tasks.Tasks.Builder(transport, jsonFactory, credential)
 		.setApplicationName("Google-TasksAndroid/1.0").build();
+	}
+	
+	public static MainActivity getInstance(){
+		return instance;
 	}
 
 	public void showGooglePlayServicesAvailabilityErrorDialog(final int connectionStatusCode) {

@@ -10,4 +10,13 @@
     <string name="refresh">Refresh</string>
     <string name="error">Error</string>
     <string name="error_format">[Error] %s</string>
+    <string name="et_hint_enter_task_name">Enter Task name</string>
+    <string name="title_task_create">Creating new Task</string>
+    
+    <string name="progress_dialog_processing">Processing..</string>
+    <string name="error_unknown_io_error">Unknown IO error</string>
+    
+    
+    
+    
 </resources>

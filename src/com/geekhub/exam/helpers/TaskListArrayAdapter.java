@@ -6,6 +6,7 @@ import java.util.List;
 import com.geekhub.exam.R;
 
 import android.content.Context;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -21,7 +22,7 @@ public class TaskListArrayAdapter extends ArrayAdapter<Task> {
 	private Context context;
 
 	public TaskListArrayAdapter(Context context, List<Task> tasks) {
-		super(context, R.layout.list_menu_item_checkbox, tasks);
+		super(context, R.layout.item, tasks);
 		this.tasks = tasks;
 		this.context = context;
 	}
@@ -42,9 +43,10 @@ public class TaskListArrayAdapter extends ArrayAdapter<Task> {
 		CheckBox checkbox = (CheckBox) row.findViewById(R.id.checkbox);
 		Task task  = tasks.get(position);
 		String taskName =	task.getTitle();
+		Log.d("TaskListArrayAdapter", taskName);
 		checkbox.setText(taskName);
 
-		return super.getView(position, convertView, parent);
+		return row;
 	}
 
 }

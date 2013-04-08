@@ -19,6 +19,7 @@ import com.actionbarsherlock.view.MenuInflater;
 import com.actionbarsherlock.view.MenuItem;
 import com.geekhub.exam.R;
 import com.geekhub.exam.activities.MainActivity;
+import com.geekhub.exam.helpers.TaskListArrayAdapter;
 import com.geekhub.exam.helpers.asyncTasks.AsyncAddTask;
 import com.geekhub.exam.helpers.asyncTasks.AsyncAddTask.AddTaskCallBack;
 import com.geekhub.exam.helpers.asyncTasks.AsyncDeleteTask;
@@ -28,7 +29,7 @@ import com.google.api.services.tasks.model.Task;
 public class TasksFragment extends SherlockFragment
 					implements NewTaskDialog.DialogFinishListener{
 	View view;
-	ArrayAdapter<Task> adapter;
+	TaskListArrayAdapter adapter;
 	private ListView listView;
 	List<String> result = null;
 	private List<Task> tasks;
@@ -108,7 +109,7 @@ public class TasksFragment extends SherlockFragment
 	}
 
 	private void updateUi() {
-		adapter = new ArrayAdapter<Task>(getSherlockActivity(), R.layout.list_menu_item_checkbox, tasks);
+		adapter = new TaskListArrayAdapter(getSherlockActivity(), tasks);
 //		resultAdapter = new ArrayAdapter<String>(getSherlockActivity(), R.layout.list_menu_item_checkbox, result);
 		getActivity().runOnUiThread(new Runnable() {
 			@Override

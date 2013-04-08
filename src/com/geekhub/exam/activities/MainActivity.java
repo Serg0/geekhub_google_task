@@ -34,6 +34,7 @@ import com.actionbarsherlock.view.MenuItem;
 import com.geekhub.exam.R;
 import com.geekhub.exam.fragments.TasksFragment;
 import com.google.android.gms.common.GooglePlayServicesUtil;
+//import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.api.client.extensions.android.http.AndroidHttp;
 import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential;
 import com.google.api.client.http.HttpTransport;
@@ -190,7 +191,7 @@ public final class MainActivity extends SherlockFragmentActivity {
 	}
 
 	private void startFragment() {
-		getSupportFragmentManager().beginTransaction().add(R.id.list, new TasksFragment()).commit();
+		getSupportFragmentManager().beginTransaction().replace(R.id.list, new TasksFragment()).commit();
 
 	}
 

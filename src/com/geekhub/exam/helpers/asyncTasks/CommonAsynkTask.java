@@ -25,6 +25,7 @@ import com.google.api.client.googleapis.extensions.android.gms.auth.UserRecovera
 
 import android.app.ProgressDialog;
 import android.os.AsyncTask;
+import android.util.Log;
 import android.view.View;
 
 import java.io.IOException;
@@ -40,6 +41,7 @@ abstract class CommonAsyncTask extends AsyncTask<Void, Void, Boolean> {
   MainActivity activity;
   com.google.api.services.tasks.Tasks client;
   private ProgressDialog progressBar;
+private String TAG = CommonAsyncTask.class.getSimpleName();
 
   CommonAsyncTask(MainActivity activity) {
     this.activity = activity;
@@ -55,11 +57,11 @@ abstract class CommonAsyncTask extends AsyncTask<Void, Void, Boolean> {
   }
 
   @Override
-  protected final Boolean doInBackground(Void... ignored) {
+  protected Boolean doInBackground(Void... ignored) {
     try {
       doInBackground();
       return true;
-    } catch (final GooglePlayServicesAvailabilityIOException availabilityException) {
+    } catch (GooglePlayServicesAvailabilityIOException availabilityException) {
       activity.showGooglePlayServicesAvailabilityErrorDialog(
           availabilityException.getConnectionStatusCode());
     } catch (UserRecoverableAuthIOException userRecoverableException) {
@@ -72,26 +74,28 @@ abstract class CommonAsyncTask extends AsyncTask<Void, Void, Boolean> {
   }
 
   @Override
-  protected final void onPostExecute(Boolean success) {
+  protected void onPostExecute(Boolean success) {
     super.onPostExecute(success);
     if (0 == --activity.numAsyncTasks) {
       progressBar.dismiss();
     }
-    if (success) {
-//      activity.refreshView();
-    	try {
+    if (success) 
 			onSuccess();
-		} catch (IOException e) {
-			String message = e.getMessage();
+			/*String message = e.getMessage();
 			if(message != null)
 				Utils.showError(activity, message);
 			else
 				Utils.showError(activity, activity.getString(R.string.error_unknown_io_error));
-			e.printStackTrace();
-		}
-    }
+    }*/
   }
 
+  @Override
+	protected void onCancelled() {
+	  if(progressBar != null)
+		  progressBar.dismiss();
+	  Log.d(TAG, "Task canseled");
+		super.onCancelled();
+	}
   abstract protected void doInBackground() throws IOException;
-  abstract protected void onSuccess() throws IOException;
+  abstract protected void onSuccess();
 }

@@ -16,9 +16,11 @@
 
 package com.geekhub.exam.helpers.asyncTasks;
 
+import com.geekhub.exam.R;
 import com.geekhub.exam.R.string;
 import com.geekhub.exam.activities.MainActivity;
 import com.geekhub.exam.constants.Constants;
+import com.geekhub.exam.utils.Utils;
 import com.google.api.services.tasks.model.Task;
 
 import java.io.IOException;
@@ -67,9 +69,18 @@ public class AsyncDeleteTask extends CommonAsyncTask {
 	}
 
 	@Override
-	protected void doInBackground() throws IOException {
+	protected void doInBackground(){
+		try {
 		for(Task task:tasks)
-			client.tasks().delete(taskListID, task.getId()).execute();
+				client.tasks().delete(taskListID, task.getId()).execute();
+			} catch (IOException e) {
+				String message = e.getMessage();
+				if(message != null)
+					Utils.showError(activity, message);
+				else
+					Utils.showError(activity, activity.getString(R.string.error_unknown_io_error));
+				e.printStackTrace();
+			}
 	}
 
 	public static void run(MainActivity tasksSample, DeleteTaskCallBack callBack, List<Task> tasks) {
@@ -77,7 +88,7 @@ public class AsyncDeleteTask extends CommonAsyncTask {
 	}
 
 	@Override
-	protected void onSuccess() throws IOException {
+	protected void onSuccess() {
 		if(callBack != null)
 			callBack.getTask(tasks);
 	}

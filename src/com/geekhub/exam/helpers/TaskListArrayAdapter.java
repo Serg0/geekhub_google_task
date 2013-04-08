@@ -1,6 +1,7 @@
 package com.geekhub.exam.helpers;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 import com.geekhub.exam.R;
@@ -23,6 +24,8 @@ public class TaskListArrayAdapter extends ArrayAdapter<Task> {
 
 	public TaskListArrayAdapter(Context context, List<Task> tasks) {
 		super(context, R.layout.item, tasks);
+		if(tasks == null)
+			tasks = new ArrayList<Task>();
 		this.tasks = tasks;
 		this.context = context;
 	}

@@ -16,6 +16,8 @@
     <string name="progress_dialog_processing">Processing..</string>
     <string name="error_unknown_io_error">Unknown IO error</string>
     
+    <string name="message_no_tasks">There no tasks in this list.\nPress \"+\" to add one.</string>
+    
     
     
     

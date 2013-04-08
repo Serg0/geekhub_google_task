@@ -3,14 +3,21 @@ package com.geekhub.exam.fragments;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.zip.Inflater;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.util.SparseBooleanArray;
 import android.view.LayoutInflater;
+import android.view.TextureView;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
+import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.actionbarsherlock.app.SherlockFragment;
@@ -23,17 +30,20 @@ import com.geekhub.exam.helpers.TaskListArrayAdapter;
 import com.geekhub.exam.helpers.asyncTasks.AsyncAddTask;
 import com.geekhub.exam.helpers.asyncTasks.AsyncAddTask.AddTaskCallBack;
 import com.geekhub.exam.helpers.asyncTasks.AsyncDeleteTask;
+import com.geekhub.exam.helpers.asyncTasks.AsyncLoadTasks;
 import com.geekhub.exam.helpers.dialogs.NewTaskDialog;
 import com.google.api.services.tasks.model.Task;
 
 public class TasksFragment extends SherlockFragment
 					implements NewTaskDialog.DialogFinishListener{
-	View view;
-	TaskListArrayAdapter adapter;
+	
+	private TaskListArrayAdapter adapter;
 	private ListView listView;
-	List<String> result = null;
-	private List<Task> tasks;
-	private ArrayAdapter<String> resultAdapter;
+	private List<Task> tasks = new ArrayList<Task>();
+	private View view;
+	private TextView lvFootterView;
+	
+	private MenuItem add, delete, edit, complete;
 	
 	public static final String TASKLIST_DEFAULT_NAME = "@default";
 
@@ -41,6 +51,7 @@ public class TasksFragment extends SherlockFragment
 	public void onCreate(Bundle savedInstanceState){
 		super.onCreate(savedInstanceState);
 		setHasOptionsMenu(true);
+		
 		
 	}
 
@@ -57,7 +68,9 @@ public class TasksFragment extends SherlockFragment
 	public void onActivityCreated(Bundle savedISnstanceState) {
 		super.onActivityCreated(savedISnstanceState);
 		initViews();
-		new Thread(new Runnable() {
+		loadTaskList();
+		
+/*		new Thread(new Runnable() {
 			@Override
 			public void run() {
 				try {
@@ -67,25 +80,92 @@ public class TasksFragment extends SherlockFragment
 					e.printStackTrace();
 				} 
 			}
-		}).start();
+		}).start();*/
 	}
 
+	private void loadTaskList() {
+		
+		AsyncLoadTasks.LoadTasksCallBack callBack = new AsyncLoadTasks.LoadTasksCallBack() {
+			
+			@Override
+			public void getTasks(List<Task> loadedTasks) {
+				tasks = loadedTasks;
+				if (tasks != null)
+					Log.d(MainActivity.TAG, "Tasks " + tasks.size());
+				Log.d(MainActivity.TAG, "Tasks " + tasks.get(0).toString());
+				updateListView();
+			}
+		};
+		AsyncLoadTasks.run(MainActivity.getInstance(), callBack);
+		
+	}
+
+
+	private OnItemClickListener onItemSelectedListener = new OnItemClickListener() {
+
+		@Override
+		public void onItemClick(AdapterView<?> arg0, View arg1, int arg2,
+				long arg3) {
+			updateActionBar();
+			
+		}
+
+		
+	};
+	
+	private void updateActionBar() {
+		
+		int checkedPositions = listView.getCheckedItemPositions().size();
+		Log.d(MainActivity.TAG, "checkedPositions = " + checkedPositions);
+		if(checkedPositions == 0){
+			edit.setVisible(false);
+			complete.setVisible(false);
+			delete.setVisible(false);
+		}else if (checkedPositions == 1){
+			edit.setVisible(true);
+			complete.setVisible(true); 
+			delete.setVisible(true);
+		}else if(checkedPositions > 1)
+		{
+			edit.setVisible(false);
+			complete.setVisible(true); 
+			delete.setVisible(true);
+		}else if(checkedPositions < 0){
+			edit.setVisible(false);
+			complete.setVisible(false);
+			delete.setVisible(false);
+		};
+		
+	}
+	
 	private void initViews() {
-		listView = (ListView) view.findViewById(R.id.list_tasts);
+		
+		
+		lvFootterView = new TextView(getActivity());
+		lvFootterView.setText(getString(R.string.message_no_tasks));
+		
+		listView = (ListView) getView().findViewById(R.id.list_tasts);
 		listView.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE);
+		adapter = new TaskListArrayAdapter(getSherlockActivity(), tasks);
+		listView.setAdapter(adapter);
+		listView.setOnItemClickListener((OnItemClickListener) onItemSelectedListener);
 		
 	}
 	void loadData() throws IOException {
-		result = new ArrayList<String>();
 		tasks = MainActivity.service.tasks().list("@default")
 				/*.setFields("items")*/.execute().getItems();
-		if (tasks != null) {
+		if (tasks != null)
+			Log.d(MainActivity.TAG, "Tasks " + tasks.size());
+			Log.d(MainActivity.TAG, "Tasks " + tasks.get(0).toString());
+		/*result = new ArrayList<String>();
+		*/
+		/*if (tasks != null) {
 			for (Task task : tasks) {
 				result.add(task.getTitle());
 			}
 		} else {
 			result.add("No tasks.");
-		}
+		}*/
 
 		//		try {
 		//			com.google.api.services.tasks.Tasks.Tasklists.List list =	MainActivity.service.tasklists().list();
@@ -107,10 +187,9 @@ public class TasksFragment extends SherlockFragment
 		//		}//list("@default")
 
 	}
-
-	private void updateUi() {
-		adapter = new TaskListArrayAdapter(getSherlockActivity(), tasks);
-//		resultAdapter = new ArrayAdapter<String>(getSherlockActivity(), R.layout.list_menu_item_checkbox, result);
+	private void updateUi(){
+	adapter = new TaskListArrayAdapter(getSherlockActivity(), tasks);
+	if(listView.getAdapter() == null)
 		getActivity().runOnUiThread(new Runnable() {
 			@Override
 			public void run() {
@@ -118,15 +197,45 @@ public class TasksFragment extends SherlockFragment
 
 			}
 		});
+}
+	private void updateListView() {
 		
+//		if(adapter == null)
+			adapter = new TaskListArrayAdapter(getSherlockActivity(), tasks);
+//		if(listView.getAdapter() == null)
+			getActivity().runOnUiThread(new Runnable() {
+				@Override
+				public void run() {
+					listView.setAdapter(adapter);
+
+				}
+			});
+		if((tasks != null)&&(tasks.size() >0)){
+			
+			listView.addFooterView(lvFootterView);
+		}else{
+			listView.removeFooterView(lvFootterView);
+		}
+		adapter.notifyDataSetChanged();
+		updateActionBar();
 	}
 
-	public void refreshView() {}
+	public void refreshView() {
+		//TODO
+	}
 
 	@Override
 	public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
 		inflater.inflate(R.menu.task_list_menu, menu);
-		super.onCreateOptionsMenu(menu, inflater);
+		
+		add = menu.findItem(R.id.add);
+		delete = menu.findItem(R.id.delete);
+		edit = menu.findItem(R.id.edit);
+		complete =	menu.findItem(R.id.complete);
+		
+		edit.setVisible(false);
+		complete.setVisible(false);
+		delete.setVisible(false);
 	}
 	
 	@Override
@@ -161,7 +270,6 @@ public class TasksFragment extends SherlockFragment
 	}
 
 	private void deleteTasks() {
-		// TODO Auto-generated method stub
 		
 		AsyncDeleteTask.DeleteTaskCallBack callBack = new AsyncDeleteTask.DeleteTaskCallBack() {
 			
@@ -200,9 +308,11 @@ public class TasksFragment extends SherlockFragment
 			@Override
 			public void getTask(Task task) {
 				if(adapter!=null){
-					adapter.add(task);
-					adapter.notifyDataSetChanged();
+//					adapter.add(task);
 					tasks.add(task);
+					adapter.notifyDataSetChanged();
+					listView.clearChoices();
+					
 				}
 				
 			}

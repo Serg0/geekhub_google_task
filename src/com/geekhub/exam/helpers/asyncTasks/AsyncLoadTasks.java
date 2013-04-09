@@ -16,6 +16,8 @@
 
 package com.geekhub.exam.helpers.asyncTasks;
 
+import android.util.Log;
+
 import com.geekhub.exam.R;
 import com.geekhub.exam.R.string;
 import com.geekhub.exam.activities.MainActivity;
@@ -34,6 +36,7 @@ import java.util.List;
  */
 public class AsyncLoadTasks extends CommonAsyncTask {
 
+	private static final String TAG_LOCAL = "AsyncLoadTasks";
 	private List<Task> tasks;
 	private LoadTasksCallBack callBack;
 	private String taskListID = Constants.DEFAULT_KEY;
@@ -51,6 +54,9 @@ public class AsyncLoadTasks extends CommonAsyncTask {
 //		try {
 			tasks = client.tasks().list(taskListID)
 					.setFields("items").execute().getItems();
+			Log.d(TAG_LOCAL, "tasks ");
+			Log.d(TAG_LOCAL, "tasks size" + tasks.size());
+	       
 			/*		} catch (IOException e) {
 			String message = e.getMessage();
 			if(message != null)

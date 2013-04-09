@@ -26,6 +26,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.util.Log;
 import android.widget.ArrayAdapter;
 
 import com.actionbarsherlock.app.SherlockFragmentActivity;
@@ -88,7 +89,9 @@ public final class MainActivity extends SherlockFragmentActivity {
 
 		// Tasks client
 		service = new com.google.api.services.tasks.Tasks.Builder(transport, jsonFactory, credential)
-		.setApplicationName("Google-TasksAndroid/1.0").build();
+		.setApplicationName("com.geekhub.exam").build();
+		Log.d(TAG, "Task client init");
+		
 	}
 	
 	public static MainActivity getInstance(){
@@ -98,6 +101,7 @@ public final class MainActivity extends SherlockFragmentActivity {
 	public void showGooglePlayServicesAvailabilityErrorDialog(final int connectionStatusCode) {
 		runOnUiThread(new Runnable() {
 			public void run() {
+				Log.d(TAG, "showGooglePlayServicesAvailabilityErrorDialog" + connectionStatusCode);
 				Dialog dialog = GooglePlayServicesUtil.getErrorDialog(connectionStatusCode, getInstance(),
 						REQUEST_GOOGLE_PLAY_SERVICES);
 				dialog.show();
@@ -116,6 +120,7 @@ public final class MainActivity extends SherlockFragmentActivity {
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		super.onActivityResult(requestCode, resultCode, data);
+		Log.d(TAG, "onActivityResult" + requestCode + " "+resultCode);
 		switch (requestCode) {
 		case REQUEST_GOOGLE_PLAY_SERVICES:
 			if (resultCode == Activity.RESULT_OK) {

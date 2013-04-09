@@ -38,10 +38,10 @@ import java.io.IOException;
  */
 abstract class CommonAsyncTask extends AsyncTask<Void, Void, Boolean> {
 
-  MainActivity activity;
-  com.google.api.services.tasks.Tasks client;
+ final  MainActivity activity;
+ final  com.google.api.services.tasks.Tasks client;
   private ProgressDialog progressBar;
-private String TAG = CommonAsyncTask.class.getSimpleName();
+protected String TAG = CommonAsyncTask.class.getSimpleName();
 
   CommonAsyncTask(MainActivity activity) {
     this.activity = activity;
@@ -58,17 +58,25 @@ private String TAG = CommonAsyncTask.class.getSimpleName();
 
   @Override
   protected final Boolean doInBackground(Void... ignored) {
+	  Log.d(TAG, "doInBackground");
     try {
       doInBackground();
       return true;
     } catch (GooglePlayServicesAvailabilityIOException availabilityException) {
+    	Log.d(TAG, "error " + "GooglePlayServicesAvailabilityIOException e ");
+        Log.d(TAG, "error " + "GooglePlayServicesAvailabilityIOException e "+availabilityException.getMessage());
       activity.showGooglePlayServicesAvailabilityErrorDialog(
           availabilityException.getConnectionStatusCode());
     } catch (UserRecoverableAuthIOException userRecoverableException) {
+    	 Log.d(TAG, "error " + "UserRecoverableAuthIOException e ");
+         Log.d(TAG, "error " + "userRecoverableException e "+userRecoverableException.getMessage());
       activity.startActivityForResult(
           userRecoverableException.getIntent(), MainActivity.REQUEST_AUTHORIZATION);
     } catch (IOException e) {
+    	
       Utils.logAndShow(activity, MainActivity.TAG, e);
+      Log.d(TAG, "error " + "IOException e ");
+      Log.d(TAG, "error " + "IOException e "+e.getMessage());
     }
     return false;
   }

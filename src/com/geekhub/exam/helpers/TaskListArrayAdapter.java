@@ -33,7 +33,7 @@ public class TaskListArrayAdapter extends ArrayAdapter<Task> {
 	@Override
 	public int getCount() {
 		int count;
-		if(tasks != null)
+		if(tasks == null)
 			count = 0;
 		else
 			count = tasks.size();

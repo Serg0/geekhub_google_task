@@ -89,10 +89,10 @@ public class TasksFragment extends SherlockFragment
 			
 			@Override
 			public void getTasks(List<Task> loadedTasks) {
-				tasks = loadedTasks;
-				if (tasks != null)
-					Log.d(MainActivity.TAG, "Tasks " + tasks.size());
-				Log.d(MainActivity.TAG, "Tasks " + tasks.get(0).toString());
+				
+				if (loadedTasks != null)
+					tasks = loadedTasks;
+//				Log.d(MainActivity.TAG, "Tasks " + tasks.get(0).toString());
 				updateListView();
 			}
 		};

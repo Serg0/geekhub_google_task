@@ -55,19 +55,18 @@ public class AsyncAddTask extends CommonAsyncTask {
 		
 	}
 
-	@Override
-	protected void doInBackground() {
+	protected void doInBackground() throws IOException {
 		
-		try {
+//		try {
 			task  = client.tasks().insert(taskListID, task).execute();
-		} catch (IOException e) {
+		/*} catch (IOException e) {
 			String message = e.getMessage();
 			if(message != null)
 				Utils.showError(activity, message);
 			else
 				Utils.showError(activity, activity.getString(R.string.error_unknown_io_error));
 			e.printStackTrace();
-		}
+		}*/
 	}
 
 	public static void run(MainActivity tasksSample,AddTaskCallBack callBack, Task task) {

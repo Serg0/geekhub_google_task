@@ -44,7 +44,7 @@ import com.google.api.services.tasks.TasksScopes;
 
 public final class MainActivity extends SherlockFragmentActivity {
 
-	private static final Level LOGGING_LEVEL = Level.OFF;
+	private static final Level LOGGING_LEVEL = Level.ALL;
 
 	private static final String PREF_ACCOUNT_NAME = "accountName";
 
@@ -98,7 +98,7 @@ public final class MainActivity extends SherlockFragmentActivity {
 	public void showGooglePlayServicesAvailabilityErrorDialog(final int connectionStatusCode) {
 		runOnUiThread(new Runnable() {
 			public void run() {
-				Dialog dialog = GooglePlayServicesUtil.getErrorDialog(connectionStatusCode, MainActivity.this,
+				Dialog dialog = GooglePlayServicesUtil.getErrorDialog(connectionStatusCode, getInstance(),
 						REQUEST_GOOGLE_PLAY_SERVICES);
 				dialog.show();
 			}
@@ -168,7 +168,7 @@ public final class MainActivity extends SherlockFragmentActivity {
 
 	/** Check that Google Play services APK is installed and up to date. */
 	private boolean checkGooglePlayServicesAvailable() {
-		final int connectionStatusCode = GooglePlayServicesUtil.isGooglePlayServicesAvailable(this);
+		int connectionStatusCode = GooglePlayServicesUtil.isGooglePlayServicesAvailable(getApplicationContext());
 		if (GooglePlayServicesUtil.isUserRecoverableError(connectionStatusCode)) {
 			showGooglePlayServicesAvailabilityErrorDialog(connectionStatusCode);
 			return false;
@@ -182,7 +182,6 @@ public final class MainActivity extends SherlockFragmentActivity {
 			// ask user to choose account
 			chooseAccount();
 		} else {
-			startFragment();
 		}
 	}
 

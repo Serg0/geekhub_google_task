@@ -29,6 +29,16 @@ public class TaskListArrayAdapter extends ArrayAdapter<Task> {
 		this.tasks = tasks;
 		this.context = context;
 	}
+	
+	@Override
+	public int getCount() {
+		int count;
+		if(tasks != null)
+			count = 0;
+		else
+			count = tasks.size();
+		return count;
+	}
 
 	@Override
 	public View getView(int position, View convertView, ViewGroup parent) {

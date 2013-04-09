@@ -57,7 +57,7 @@ private String TAG = CommonAsyncTask.class.getSimpleName();
   }
 
   @Override
-  protected Boolean doInBackground(Void... ignored) {
+  protected final Boolean doInBackground(Void... ignored) {
     try {
       doInBackground();
       return true;

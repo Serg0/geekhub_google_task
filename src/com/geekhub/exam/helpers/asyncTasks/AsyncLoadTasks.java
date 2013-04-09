@@ -47,19 +47,18 @@ public class AsyncLoadTasks extends CommonAsyncTask {
 		this.callBack = callBack;
 	}
 
-	@Override
-	protected void doInBackground() {
-		try {
+	protected void doInBackground() throws IOException {
+//		try {
 			tasks = client.tasks().list(taskListID)
 					.setFields("items").execute().getItems();
-		} catch (IOException e) {
+			/*		} catch (IOException e) {
 			String message = e.getMessage();
 			if(message != null)
 				Utils.showError(activity, message);
 			else
 				Utils.showError(activity, activity.getString(R.string.error_unknown_io_error));
 			e.printStackTrace();
-		}
+		}*/
 	}
 
 	public static void run(MainActivity tasksSample, LoadTasksCallBack callBack) {

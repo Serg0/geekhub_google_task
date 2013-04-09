@@ -68,19 +68,19 @@ public class AsyncDeleteTask extends CommonAsyncTask {
 		
 	}
 
-	@Override
-	protected void doInBackground(){
-		try {
+//	@Override
+	protected void doInBackground() throws IOException{
+//		try {
 		for(Task task:tasks)
 				client.tasks().delete(taskListID, task.getId()).execute();
-			} catch (IOException e) {
+			/*} catch (IOException e) {
 				String message = e.getMessage();
 				if(message != null)
 					Utils.showError(activity, message);
 				else
 					Utils.showError(activity, activity.getString(R.string.error_unknown_io_error));
 				e.printStackTrace();
-			}
+			}*/
 	}
 
 	public static void run(MainActivity tasksSample, DeleteTaskCallBack callBack, List<Task> tasks) {

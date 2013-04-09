@@ -86,8 +86,9 @@ public class TasksFragment extends SherlockFragment
 			return true;
 		}
 		case R.id.complete:{
-
-				feachureUnderConstruction();
+				listView.clearChoices();
+				showToast("listView.clearChoices()");
+//				feachureUnderConstruction();
 			return true;
 		}
 
@@ -135,6 +136,7 @@ public class TasksFragment extends SherlockFragment
 				long arg3) {
 			updateActionBar();
 			
+			
 		}
 
 		
@@ -173,7 +175,7 @@ public class TasksFragment extends SherlockFragment
 		
 		listView = (ListView) getView().findViewById(R.id.list_tasts);
 		listView.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE);
-		listView.setOnItemClickListener(onItemClickListener);
+//		listView.setOnItemClickListener(onItemClickListener);
 		
 	}
 	private void updateUi(){
@@ -209,7 +211,7 @@ public class TasksFragment extends SherlockFragment
 			listView.addFooterView(lvFootterView);
 		}*/
 		adapter.notifyDataSetChanged();
-		updateActionBar();
+//		updateActionBar();
 	}
 
 	public void refreshView() {
@@ -220,7 +222,10 @@ public class TasksFragment extends SherlockFragment
 
 	
 
-
+	private void showToast(String toastText) {
+		Toast.makeText(getActivity(), toastText , Toast.LENGTH_SHORT).show();
+		
+	}
 
 	private void feachureUnderConstruction() {
 		Toast.makeText(getActivity(), "Feachure is under constraction!" , Toast.LENGTH_SHORT).show();
@@ -295,6 +300,7 @@ public class TasksFragment extends SherlockFragment
 					updateUi();
 					listView.clearChoices();
 					
+					
 //				}
 				
 			}
@@ -318,4 +324,6 @@ public class TasksFragment extends SherlockFragment
 		AsyncDeleteTask.run(MainActivity.getInstance(), callBack, getChoosenItems());
 		
 	}
+	
+
 }

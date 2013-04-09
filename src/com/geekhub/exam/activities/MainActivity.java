@@ -83,7 +83,7 @@ public final class MainActivity extends SherlockFragmentActivity {
 
 		instance = this;
 		// Google Accounts
-		credential = GoogleAccountCredential.usingOAuth2(this, TasksScopes.TASKS);
+		credential = GoogleAccountCredential.usingOAuth2(getApplicationContext(), TasksScopes.TASKS);
 		SharedPreferences settings = getPreferences(Context.MODE_PRIVATE);
 		credential.setSelectedAccountName(settings.getString(PREF_ACCOUNT_NAME, null));
 
@@ -112,7 +112,9 @@ public final class MainActivity extends SherlockFragmentActivity {
 	@Override
 	protected void onResume() {
 		super.onResume();
+		Log.d(TAG, "if (checkGooglePlayServicesAvailable())");
 		if (checkGooglePlayServicesAvailable()) {
+			Log.d(TAG, "checkGooglePlayServicesAvailable It is!");
 			haveGooglePlayServices();
 		}
 	}
@@ -187,6 +189,7 @@ public final class MainActivity extends SherlockFragmentActivity {
 			// ask user to choose account
 			chooseAccount();
 		} else {
+			startFragment();
 		}
 	}
 

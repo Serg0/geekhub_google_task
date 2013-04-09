@@ -175,7 +175,7 @@ public class TasksFragment extends SherlockFragment
 		
 		listView = (ListView) getView().findViewById(R.id.list_tasts);
 		listView.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE);
-//		listView.setOnItemClickListener(onItemClickListener);
+		listView.setOnItemClickListener(onItemClickListener);
 		
 	}
 	private void updateUi(){

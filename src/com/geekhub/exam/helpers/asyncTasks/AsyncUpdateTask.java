@@ -32,24 +32,24 @@ import java.util.List;
  * 
  * @author Yaniv Inbar
  */
-public class AsyncAddTask extends CommonAsyncTask {
+public class AsyncUpdateTask extends CommonAsyncTask {
 
 	private Task task;
-	private AddTaskCallBack callBack;
+	private UpdateTaskCallBack callBack;
 	private String taskListID = Constants.DEFAULT_KEY;
 	
-	AsyncAddTask(MainActivity activity, AddTaskCallBack callBack, Task task) {
+	AsyncUpdateTask(MainActivity activity, UpdateTaskCallBack callBack, Task task) {
 		this(activity, callBack);
 		this.task = task;
 	}
 	
-	AsyncAddTask(MainActivity activity, AddTaskCallBack callBack, String taskListID, Task task) {
+	AsyncUpdateTask(MainActivity activity, UpdateTaskCallBack callBack, String taskListID, Task task) {
 		this(activity, callBack);
 		this.taskListID = taskListID;
 		this.task = task;
 	}
 	
-	AsyncAddTask(MainActivity activity, AddTaskCallBack callBack) {
+	AsyncUpdateTask(MainActivity activity, UpdateTaskCallBack callBack) {
 		super(activity);
 		this.callBack = callBack;
 		
@@ -57,20 +57,12 @@ public class AsyncAddTask extends CommonAsyncTask {
 
 	protected void doInBackground() throws IOException {
 		
-//		try {
-			task  = client.tasks().insert(taskListID, task).execute();
-		/*} catch (IOException e) {
-			String message = e.getMessage();
-			if(message != null)
-				Utils.showError(activity, message);
-			else
-				Utils.showError(activity, activity.getString(R.string.error_unknown_io_error));
-			e.printStackTrace();
-		}*/
+			task  = client.tasks().update(taskListID, task.getId(), task).execute();
+		
 	}
 
-	public static void run(MainActivity tasksSample,AddTaskCallBack callBack, String taskListID, Task task) {
-		new AsyncAddTask(tasksSample, callBack, taskListID, task).execute();
+	public static void run(MainActivity tasksSample, UpdateTaskCallBack callBack,String taskListID, Task task) {
+		new AsyncUpdateTask(tasksSample, callBack,taskListID, task).execute();
 	}
 
 	@Override
@@ -78,7 +70,7 @@ public class AsyncAddTask extends CommonAsyncTask {
 		if(callBack != null)
 			callBack.getTask(task);
 	}
-	public interface AddTaskCallBack{
+	public interface UpdateTaskCallBack{
 		void getTask(Task task);
 		
 	}

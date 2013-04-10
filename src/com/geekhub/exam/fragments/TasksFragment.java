@@ -15,6 +15,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
+import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ArrayAdapter;
 import android.widget.LinearLayout;
@@ -34,11 +35,12 @@ import com.geekhub.exam.helpers.asyncTasks.AsyncAddTask;
 import com.geekhub.exam.helpers.asyncTasks.AsyncAddTask.AddTaskCallBack;
 import com.geekhub.exam.helpers.asyncTasks.AsyncDeleteTask;
 import com.geekhub.exam.helpers.asyncTasks.AsyncLoadTasks;
-import com.geekhub.exam.helpers.dialogs.NewTaskDialog;
+import com.geekhub.exam.helpers.asyncTasks.AsyncUpdateTask;
+import com.geekhub.exam.helpers.dialogs.TaskDialog;
 import com.google.api.services.tasks.model.Task;
 
 public class TasksFragment extends SherlockFragment
-					implements NewTaskDialog.DialogFinishListener{
+					implements TaskDialog.DialogFinishListener{
 	
 	private TaskListArrayAdapter adapter;
 	private ListView listView;
@@ -85,8 +87,9 @@ public class TasksFragment extends SherlockFragment
 			return true;
 		}
 		case R.id.edit:{
-
-				feachureUnderConstruction();
+			
+			editNewTask(getChoosenSingleItemPos());
+//				feachureUnderConstruction();
 			return true;
 		}
 		case R.id.complete:{
@@ -215,6 +218,18 @@ public class TasksFragment extends SherlockFragment
 		listView.addFooterView(lvFootterView);
 		lvFootterView.setVisibility(View.GONE);
 		updateFooterState();
+		listView.setOnItemLongClickListener(new OnItemLongClickListener() {
+
+			@Override
+			public boolean onItemLongClick(AdapterView<?> arg0, View arg1,
+					int pos, long arg3) {
+				if(tasks.size() <pos){
+					editNewTask(getChoosenSingleItemPos());
+					return true;
+				}
+				return false;
+			}
+		});
 	}
 	private void updateUi(){
 		
@@ -263,15 +278,32 @@ public class TasksFragment extends SherlockFragment
 	}
 
 	private void addNewTask() {
-		NewTaskDialog newTaskDialog = new NewTaskDialog(this);
+		TaskDialog newTaskDialog = new TaskDialog(this, null);
+		newTaskDialog.show(getFragmentManager(), getTag());
+		
+	}
+	
+	private void editNewTask(final int taskPos) {
+		
+		TaskDialog.DialogFinishListener editListener = new TaskDialog.DialogFinishListener() {
+			
+			@Override
+			public void onFinishDialogAddTask(Task task) {
+				editTaskUpdate(task, taskPos);
+				
+			}
+
+		};
+		
+		TaskDialog newTaskDialog = new TaskDialog(editListener, tasks.get(taskPos));
 		newTaskDialog.show(getFragmentManager(), getTag());
 		
 	}
 
 	@Override
-	public void onFinishDialogAddTask(String taskName) {
+	public void onFinishDialogAddTask(Task task) {
 		
-		addTaskAsync(taskName);
+		addTaskAsync(task);
 	}
 
 	private String getCurrentTaskList(){
@@ -296,6 +328,20 @@ public class TasksFragment extends SherlockFragment
 		return tasks;
 	}
 	
+	private int  getChoosenSingleItemPos(){
+		int pos = 0;
+		SparseBooleanArray sparseBooleanArray = listView.getCheckedItemPositions();
+		int cntChoice = listView.getCount();
+		for(int i = 0; i < cntChoice; ++i){
+			 
+            if(sparseBooleanArray.get(i)) {
+            	
+            	return i;
+            }
+		}
+		
+		return -1;
+	}
 	private int  getChoosenItemsCount(){
 		int conut = 0;
 		SparseBooleanArray sparseBooleanArray = listView.getCheckedItemPositions();
@@ -347,11 +393,8 @@ public class TasksFragment extends SherlockFragment
 		
 	}
 	
-	private void addTaskAsync(String taskName){
+	private void addTaskAsync(Task task){
 		
-		Task task = new Task();
-		
-		task.setTitle(taskName);
 		AddTaskCallBack callBack = new AddTaskCallBack() {
 			
 			@Override
@@ -368,7 +411,7 @@ public class TasksFragment extends SherlockFragment
 			}
 		};
 		
-		AsyncAddTask.run(MainActivity.getInstance(), callBack , task);
+		AsyncAddTask.run(MainActivity.getInstance(), callBack, getCurrentTaskList(), task);
 		
 	}
 	
@@ -385,9 +428,25 @@ public class TasksFragment extends SherlockFragment
 			}
 		};
 		
-		AsyncDeleteTask.run(MainActivity.getInstance(), callBack, getChoosenItems());
+		AsyncDeleteTask.run(MainActivity.getInstance(), callBack, getCurrentTaskList(), getChoosenItems());
 		
 	}
 	
-
+	private void editTaskUpdate(Task task, final int taskPos) {
+		
+		AsyncUpdateTask.UpdateTaskCallBack callBack = new AsyncUpdateTask.UpdateTaskCallBack() {
+			
+			@Override
+			public void getTask(Task task) {
+				tasks.set(taskPos, task);
+				updateUi();
+				unchekListView();
+			}
+		};
+		
+		AsyncUpdateTask.run(MainActivity.getInstance(), callBack, getCurrentTaskList(), task);
+		
+		
+	}
+	
 }

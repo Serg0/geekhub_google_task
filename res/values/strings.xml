@@ -11,7 +11,13 @@
     <string name="error">Error</string>
     <string name="error_format">[Error] %s</string>
     <string name="et_hint_enter_task_name">Enter Task name</string>
+    <string name="et_hint_enter_task_desc">Enter Task description</string>
+    
+     <string name="et_label_task_name">Task name:</string>
+      <string name="et_label_task_desc">Description:</string>
+      
     <string name="title_task_create">Creating new Task</string>
+    <string name="title_task_edit">Edit Task</string>
     
     <string name="progress_dialog_processing">Processing..</string>
     <string name="error_unknown_io_error">Unknown IO error</string>

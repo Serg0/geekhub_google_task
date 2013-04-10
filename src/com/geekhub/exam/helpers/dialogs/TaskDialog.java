@@ -12,16 +12,20 @@ import android.view.View;
 import android.widget.EditText;
 
 @SuppressLint("ValidFragment")
-public class NewTaskDialog  extends DialogFragment{
+public class TaskDialog  extends DialogFragment{
 
 	 public interface DialogFinishListener {
-	        void onFinishDialogAddTask(String inputText);
+	        void onFinishDialogAddTask(Task task);
 	    }
 	    private DialogFinishListener mParent;
-	    private EditText mTaskTitle;
+	    private EditText 
+	    			mTaskTitle,
+	    			mTaskDesc;
+	    private Task task;
 
-	    public NewTaskDialog(DialogFinishListener parent) {
+	    public TaskDialog(DialogFinishListener parent, Task task) {
 	        mParent = parent;
+	        this.task = task;
 //	        setDialogType(DialogType.AlertDialog);
 	    }
 
@@ -38,14 +42,33 @@ public class NewTaskDialog  extends DialogFragment{
 	        View layout = getActivity().getLayoutInflater().inflate(R.layout.new_task_edit, null);
 
 	        mTaskTitle = (EditText) layout.findViewById(R.id.etTaskTitle);
-
+	        mTaskDesc  = (EditText) layout.findViewById(R.id.etTaskDesc);
+	        
+	        String dialogTitle;
+	        if(task != null){
+	        	String title = task.getTitle();
+	        	String desc = task.getNotes();
+	        	if(title!=null)
+	        		mTaskTitle.setText(title);
+	        	if(desc!=null)
+	        		mTaskDesc.setText(desc);
+	        	
+	        	dialogTitle = getString(R.string.title_task_edit);
+	        }else{
+	        	task = new Task();
+	        	dialogTitle = getString(R.string.title_task_create);
+	        }
+	        
 	        builder
 	                .setView(layout)
-	                .setTitle(getString(R.string.title_task_create))
+	                .setTitle(dialogTitle)
 	                .setPositiveButton(getString(android.R.string.ok), new DialogInterface.OnClickListener() {
 	                    @Override
 	                    public void onClick(DialogInterface dialogInterface, int i) {
-	                        mParent.onFinishDialogAddTask(mTaskTitle.getText().toString());
+	                    	task.setTitle(mTaskTitle.getText().toString());
+	                    	task.setNotes(mTaskDesc.getText().toString());
+	                    	if(mParent!=null)
+	                    		mParent.onFinishDialogAddTask(task);
 	                    }
 	                })
 	                .setNegativeButton(getString(android.R.string.cancel), new DialogInterface.OnClickListener() {

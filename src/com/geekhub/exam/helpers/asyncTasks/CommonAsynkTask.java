@@ -89,14 +89,15 @@ protected String TAG = CommonAsyncTask.class.getSimpleName();
     }
     if (success) 
 			onSuccess();
-			/*String message = e.getMessage();
-			if(message != null)
-				Utils.showError(activity, message);
-			else
-				Utils.showError(activity, activity.getString(R.string.error_unknown_io_error));
-    }*/
   }
 
+  @Override
+	protected void finalize() throws Throwable {
+	  if(progressBar != null)
+		  progressBar.dismiss();
+	  Log.d(TAG, "Task finalized");
+		super.finalize();
+	}
   @Override
 	protected void onCancelled() {
 	  if(progressBar != null)

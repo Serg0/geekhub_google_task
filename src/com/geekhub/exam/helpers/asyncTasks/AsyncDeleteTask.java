@@ -83,8 +83,8 @@ public class AsyncDeleteTask extends CommonAsyncTask {
 			}*/
 	}
 
-	public static void run(MainActivity tasksSample, DeleteTaskCallBack callBack, List<Task> tasks) {
-		new AsyncDeleteTask(tasksSample, callBack, tasks).execute();
+	public static void run(MainActivity tasksSample, DeleteTaskCallBack callBack, String taskListID, List<Task> tasks) {
+		new AsyncDeleteTask(tasksSample, callBack, taskListID, tasks).execute();
 	}
 
 	@Override

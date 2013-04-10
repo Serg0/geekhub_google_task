@@ -401,7 +401,7 @@ public class TasksFragment extends SherlockFragment
 			public void getTask(Task task) {
 //				if(adapter!=null){
 //					adapter.add(task);
-					tasks.add(task);
+					tasks.add(0, task);
 					updateUi();
 					listView.clearChoices();
 					

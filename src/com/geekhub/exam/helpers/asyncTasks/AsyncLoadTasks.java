@@ -54,8 +54,8 @@ public class AsyncLoadTasks extends CommonAsyncTask {
 //		try {
 			tasks = client.tasks().list(taskListID)
 					.setFields("items").execute().getItems();
-			Log.d(TAG_LOCAL, "tasks ");
-			Log.d(TAG_LOCAL, "tasks size" + tasks.size());
+			/*Log.d(TAG_LOCAL, "tasks ");
+			Log.d(TAG_LOCAL, "tasks size" + tasks.size());*/
 	       
 			/*		} catch (IOException e) {
 			String message = e.getMessage();

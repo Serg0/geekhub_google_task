@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.zip.Inflater;
 
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.util.SparseBooleanArray;
 import android.view.LayoutInflater;
@@ -16,10 +17,12 @@ import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ArrayAdapter;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.actionbarsherlock.app.ActionBar;
 import com.actionbarsherlock.app.SherlockFragment;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuInflater;
@@ -41,9 +44,10 @@ public class TasksFragment extends SherlockFragment
 	private ListView listView;
 	private List<Task> tasks = new ArrayList<Task>();
 	private View view;
-	private TextView lvFootterView;
+	private LinearLayout lvFootterView;
 	
 	private MenuItem add, delete, edit, complete;
+	private ActionBar actionBar;
 	
 	public static final String TASKLIST_DEFAULT_NAME = "@default";
 
@@ -88,9 +92,13 @@ public class TasksFragment extends SherlockFragment
 		case R.id.complete:{
 				listView.clearChoices();
 				showToast("listView.clearChoices()");
-//				feachureUnderConstruction();
 			return true;
 		}
+		case R.id.menu_refresh:{
+			loadTaskListAsync();
+			
+		return true;
+	}
 
 		default:
 			break;
@@ -112,7 +120,7 @@ public class TasksFragment extends SherlockFragment
 		super.onActivityCreated(savedISnstanceState);
 		initViews();
 		loadTaskListAsync();
-		
+		initActionBar();
 /*		new Thread(new Runnable() {
 			@Override
 			public void run() {
@@ -129,6 +137,16 @@ public class TasksFragment extends SherlockFragment
 	
 
 
+	private void initActionBar() {
+		actionBar = getSherlockActivity().getSupportActionBar();
+		actionBar.setTitle(getCurrentTaskList());
+		
+		
+	}
+
+
+
+
 	private OnItemClickListener onItemClickListener = new OnItemClickListener() {
 
 		@Override
@@ -138,13 +156,29 @@ public class TasksFragment extends SherlockFragment
 			
 			
 		}
-
 		
+	};
+	
+	private OnItemSelectedListener onItemSelectedListener = new OnItemSelectedListener() {
+
+		@Override
+		public void onItemSelected(AdapterView<?> arg0, View arg1,
+				int arg2, long arg3) {
+			updateActionBar();
+			
+		}
+
+		@Override
+		public void onNothingSelected(AdapterView<?> arg0) {
+			updateActionBar();
+			
+		}
 	};
 	
 	private void updateActionBar() {
 		
-		int checkedPositions = listView.getCheckedItemPositions().size();
+		//TODO implement correct check
+		int checkedPositions = getChoosenItemsCount();
 		Log.d(MainActivity.TAG, "checkedPositions = " + checkedPositions);
 		if(checkedPositions == 0){
 			edit.setVisible(false);
@@ -170,13 +204,17 @@ public class TasksFragment extends SherlockFragment
 	private void initViews() {
 		
 		
-		lvFootterView = new TextView(getActivity());
-		lvFootterView.setText(getString(R.string.message_no_tasks));
+		/*lvFootterView = new TextView(getActivity());
+		lvFootterView.setText(getString(R.string.message_no_tasks));*/
+		lvFootterView = (LinearLayout) getView().inflate(getActivity(), R.layout.footter,null);
 		
 		listView = (ListView) getView().findViewById(R.id.list_tasts);
 		listView.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE);
 		listView.setOnItemClickListener(onItemClickListener);
-		
+		listView.setOnItemSelectedListener(onItemSelectedListener);
+		listView.addFooterView(lvFootterView);
+		lvFootterView.setVisibility(View.GONE);
+		updateFooterState();
 	}
 	private void updateUi(){
 		
@@ -186,36 +224,28 @@ public class TasksFragment extends SherlockFragment
 			Log.d(MainActivity.TAG, "adapter != null");
 		}else{
 			Log.d(MainActivity.TAG, "adapter == null");
-			updateListView();
+			setUpListViewAdapter();
 		}
+		updateFooterState();
+		
+		adapter.notifyDataSetChanged();
 		
 	}
 	
-	private void updateListView() {
+	private void updateFooterState(){
+		
+		int footterVisibility = View.GONE;
+		
+		if((tasks == null)||(tasks.size() == 0))
+				footterVisibility = View.VISIBLE;
+			
+		lvFootterView.setVisibility(footterVisibility);
+	}
+	private void setUpListViewAdapter() {
 		
 			adapter = new TaskListArrayAdapter(getSherlockActivity(), tasks);
 			listView.setAdapter(adapter);
-			/*getActivity().runOnUiThread(new Runnable() {
-				@Override
-				public void run() {
-					
-
-				}
-			});*/
 			
-/*		if((tasks != null)&&(tasks.size() >0)){
-			
-			listView.removeFooterView(lvFootterView);
-		}else{
-			
-			listView.addFooterView(lvFootterView);
-		}*/
-		adapter.notifyDataSetChanged();
-//		updateActionBar();
-	}
-
-	public void refreshView() {
-		//TODO
 	}
 
 	
@@ -254,7 +284,7 @@ public class TasksFragment extends SherlockFragment
 		SparseBooleanArray sparseBooleanArray = listView.getCheckedItemPositions();
 		int cntChoice = listView.getCount();
 		List<Task> tasks = new ArrayList<Task>();
-		for(int i = 0; i < cntChoice; i++){
+		for(int i = 0; i < cntChoice; ++i){
 			 
             if(sparseBooleanArray.get(i)) {
 
@@ -265,6 +295,38 @@ public class TasksFragment extends SherlockFragment
 		
 		return tasks;
 	}
+	
+	private int  getChoosenItemsCount(){
+		int conut = 0;
+		SparseBooleanArray sparseBooleanArray = listView.getCheckedItemPositions();
+		int cntChoice = listView.getCount();
+		List<Task> tasks = new ArrayList<Task>();
+		for(int i = 0; i < cntChoice; ++i){
+			 
+            if(sparseBooleanArray.get(i)) {
+            	
+            	conut++;
+            }
+		}
+		
+		return conut;
+	}
+	
+	private void unchekListView(){
+		
+		SparseBooleanArray sparseBooleanArray = listView.getCheckedItemPositions();
+		int cntChoice = listView.getCount();
+		for(int i = 0; i < cntChoice; ++i){
+			 
+            if(sparseBooleanArray.get(i)) {
+
+            	listView.setItemChecked(i, false);
+
+            }
+		}
+		
+	}
+
 	
 	private void loadTaskListAsync() {
 		
@@ -318,6 +380,8 @@ public class TasksFragment extends SherlockFragment
 			public void getTask(List<Task> deletedTasks) {
 				tasks.removeAll(deletedTasks);
 				updateUi();
+				updateFooterState();
+				unchekListView();
 			}
 		};
 		

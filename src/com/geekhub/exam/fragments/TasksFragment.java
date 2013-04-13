@@ -40,7 +40,7 @@ import com.geekhub.exam.helpers.dialogs.TaskDialog;
 import com.google.api.services.tasks.model.Task;
 
 public class TasksFragment extends SherlockFragment
-					implements TaskDialog.DialogFinishListener{
+					implements TaskDialog.DialogFinishListener, MainActivity.RefreshCallBack{
 	
 	private TaskListArrayAdapter adapter;
 	private ListView listView;
@@ -57,6 +57,7 @@ public class TasksFragment extends SherlockFragment
 	public void onCreate(Bundle savedInstanceState){
 		super.onCreate(savedInstanceState);
 		setHasOptionsMenu(true);
+		MainActivity.getInstance().setRefreshCallBack(this);
 		
 	}
 
@@ -382,7 +383,9 @@ public class TasksFragment extends SherlockFragment
 			public void getTasks(List<Task> loadedTasks) {
 				
 				if (loadedTasks != null){
+					tasks.clear();
 					tasks.addAll(loadedTasks);
+//					tasks = loadedTasks;
 					Log.d(MainActivity.TAG, "Tasks loaded" + tasks.size());
 					updateUi();
 				}
@@ -448,5 +451,23 @@ public class TasksFragment extends SherlockFragment
 		
 		
 	}
+
+	@Override
+	public void refresh() {
+		
+		loadTaskListAsync();
+		
+	}
+
+	@Override
+	public void accountChanged() {
+		tasks.clear();
+		loadTaskListAsync();
+	}
 	
+	@Override
+	public void onDestroy() {
+		MainActivity.getInstance().removeRefreshCallBack();
+		super.onDestroy();
+	}
 }

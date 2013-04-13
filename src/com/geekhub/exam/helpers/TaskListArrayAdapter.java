@@ -62,4 +62,5 @@ public class TaskListArrayAdapter extends ArrayAdapter<Task> {
 		return row;
 	}
 
+	
 }

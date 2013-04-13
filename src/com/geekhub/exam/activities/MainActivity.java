@@ -73,6 +73,7 @@ public final class MainActivity extends SherlockFragmentActivity {
 
 	private static MainActivity instance;
 
+	private RefreshCallBack refreshCallBack;
 	//	private ListView listView;
 
 	@Override
@@ -83,7 +84,7 @@ public final class MainActivity extends SherlockFragmentActivity {
 
 		instance = this;
 		// Google Accounts
-		credential = GoogleAccountCredential.usingOAuth2(getApplicationContext(), TasksScopes.TASKS);
+		credential = GoogleAccountCredential.usingOAuth2(this, TasksScopes.TASKS);
 		SharedPreferences settings = getPreferences(Context.MODE_PRIVATE);
 		credential.setSelectedAccountName(settings.getString(PREF_ACCOUNT_NAME, null));
 
@@ -91,6 +92,7 @@ public final class MainActivity extends SherlockFragmentActivity {
 		service = new com.google.api.services.tasks.Tasks.Builder(transport, jsonFactory, credential)
 		.setApplicationName("com.geekhub.exam").build();
 		Log.d(TAG, "Task client init");
+		startFragment();
 		
 	}
 	
@@ -133,7 +135,7 @@ public final class MainActivity extends SherlockFragmentActivity {
 			break;
 		case REQUEST_AUTHORIZATION:
 			if (resultCode == Activity.RESULT_OK) {
-				startFragment();
+				sendRefreshNotification();
 			} else {
 				chooseAccount();
 			}
@@ -147,7 +149,7 @@ public final class MainActivity extends SherlockFragmentActivity {
 					SharedPreferences.Editor editor = settings.edit();
 					editor.putString(PREF_ACCOUNT_NAME, accountName);
 					editor.commit();
-					startFragment();
+					sendAccountChanged();
 				}
 			}
 			break;
@@ -164,7 +166,7 @@ public final class MainActivity extends SherlockFragmentActivity {
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
 		case R.id.menu_refresh:
-			startFragment();
+			sendRefreshNotification();
 			break;
 		case R.id.menu_accounts:
 			chooseAccount();
@@ -189,7 +191,7 @@ public final class MainActivity extends SherlockFragmentActivity {
 			// ask user to choose account
 			chooseAccount();
 		} else {
-			startFragment();
+			sendRefreshNotification();
 		}
 	}
 
@@ -201,5 +203,34 @@ public final class MainActivity extends SherlockFragmentActivity {
 		getSupportFragmentManager().beginTransaction().replace(R.id.list, new TasksFragment()).commit();
 
 	}
+	
+	private void sendAccountChanged(){
+		if(refreshCallBack != null)
+			refreshCallBack.accountChanged();
+		
+	}
+	private void sendRefreshNotification(){
+		
+		
+		//TODO temporary disabled to prevent overabundant downloads
+		/*if(refreshCallBack != null)
+			refreshCallBack.refresh();
+		*/
+	}
+	public void setRefreshCallBack(RefreshCallBack refreshCallBack){
+		
+		this.refreshCallBack = refreshCallBack;
+		
+	}
+	
+	public void removeRefreshCallBack(){
+		
+		this.refreshCallBack = null;
+		
+	}
 
+	public interface RefreshCallBack{
+		public void refresh();
+		public void accountChanged();
+	};
 }

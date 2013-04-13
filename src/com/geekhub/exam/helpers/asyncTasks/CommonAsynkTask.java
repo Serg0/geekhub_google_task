@@ -52,6 +52,7 @@ protected String TAG = CommonAsyncTask.class.getSimpleName();
   @Override
   protected void onPreExecute() {
     super.onPreExecute();
+    Log.d(TAG, getClass().getSimpleName() + "task started");
     activity.numAsyncTasks++;
     progressBar = ProgressDialog.show(activity, null,activity.getString(R.string.progress_dialog_processing),true, false);
   }

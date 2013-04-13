@@ -60,6 +60,7 @@ protected String TAG = CommonAsyncTask.class.getSimpleName();
   @Override
   protected final Boolean doInBackground(Void... ignored) {
 	  Log.d(TAG, "doInBackground");
+	  if(activity.credential.getSelectedAccountName() != null)
     try {
       doInBackground();
       return true;

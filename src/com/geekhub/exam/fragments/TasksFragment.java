@@ -57,7 +57,8 @@ public class TasksFragment extends SherlockFragment
 	public void onCreate(Bundle savedInstanceState){
 		super.onCreate(savedInstanceState);
 		setHasOptionsMenu(true);
-		MainActivity.getInstance().setRefreshCallBack(this);
+		if(MainActivity.getInstance() !=null)
+			MainActivity.getInstance().setRefreshCallBack(this);
 		
 	}
 
@@ -383,6 +384,7 @@ public class TasksFragment extends SherlockFragment
 			public void getTasks(List<Task> loadedTasks) {
 				
 				if (loadedTasks != null){
+					unchekListView();
 					tasks.clear();
 					tasks.addAll(loadedTasks);
 //					tasks = loadedTasks;
@@ -392,7 +394,9 @@ public class TasksFragment extends SherlockFragment
 				
 			}
 		};
-		AsyncLoadTasks.run(MainActivity.getInstance(), callBack);
+		
+		if(MainActivity.getInstance() !=null)
+			AsyncLoadTasks.run(MainActivity.getInstance(), callBack);
 		
 	}
 	
@@ -414,7 +418,8 @@ public class TasksFragment extends SherlockFragment
 			}
 		};
 		
-		AsyncAddTask.run(MainActivity.getInstance(), callBack, getCurrentTaskList(), task);
+		if(MainActivity.getInstance() !=null)
+			AsyncAddTask.run(MainActivity.getInstance(), callBack, getCurrentTaskList(), task);
 		
 	}
 	
@@ -431,7 +436,8 @@ public class TasksFragment extends SherlockFragment
 			}
 		};
 		
-		AsyncDeleteTask.run(MainActivity.getInstance(), callBack, getCurrentTaskList(), getChoosenItems());
+		if(MainActivity.getInstance() !=null)
+			AsyncDeleteTask.run(MainActivity.getInstance(), callBack, getCurrentTaskList(), getChoosenItems());
 		
 	}
 	
@@ -447,7 +453,8 @@ public class TasksFragment extends SherlockFragment
 			}
 		};
 		
-		AsyncUpdateTask.run(MainActivity.getInstance(), callBack, getCurrentTaskList(), task);
+		if(MainActivity.getInstance() !=null)
+			AsyncUpdateTask.run(MainActivity.getInstance(), callBack, getCurrentTaskList(), task);
 		
 		
 	}
@@ -461,13 +468,14 @@ public class TasksFragment extends SherlockFragment
 
 	@Override
 	public void accountChanged() {
-		tasks.clear();
+//		tasks.clear();
 		loadTaskListAsync();
 	}
 	
 	@Override
 	public void onDestroy() {
-		MainActivity.getInstance().removeRefreshCallBack();
+		if(MainActivity.getInstance() !=null)
+			MainActivity.getInstance().removeRefreshCallBack();
 		super.onDestroy();
 	}
 }

@@ -61,7 +61,7 @@ public final class MainActivity extends SherlockFragmentActivity {
 
 	final JsonFactory jsonFactory = new GsonFactory();
 
-	GoogleAccountCredential credential;
+	public GoogleAccountCredential credential;
 
 	public List<String> tasksList;
 
@@ -91,6 +91,8 @@ public final class MainActivity extends SherlockFragmentActivity {
 		// Tasks client
 		service = new com.google.api.services.tasks.Tasks.Builder(transport, jsonFactory, credential)
 		.setApplicationName("com.geekhub.exam").build();
+		
+		
 		Log.d(TAG, "Task client init");
 		startFragment();
 		

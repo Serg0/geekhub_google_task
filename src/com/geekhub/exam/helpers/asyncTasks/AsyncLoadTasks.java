@@ -67,8 +67,8 @@ public class AsyncLoadTasks extends CommonAsyncTask {
 		}*/
 	}
 
-	public static void run(MainActivity tasksSample, LoadTasksCallBack callBack) {
-		new AsyncLoadTasks(tasksSample, callBack).execute();
+	public static void run(MainActivity tasksSample, LoadTasksCallBack callBack, String taskListID) {
+		new AsyncLoadTasks(tasksSample, callBack, taskListID).execute();
 	}
 
 	@Override

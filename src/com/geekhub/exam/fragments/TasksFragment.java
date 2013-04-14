@@ -35,7 +35,7 @@ import com.geekhub.exam.helpers.dialogs.TaskDialog;
 import com.google.api.services.tasks.model.Task;
 
 public class TasksFragment extends SherlockFragment
-implements TaskDialog.DialogFinishListener{
+implements TaskDialog.DialogFinishListener, MainActivity.RefreshCallBack{
 
 	private TaskListArrayAdapter adapter;
 	private ListView listView;
@@ -389,20 +389,18 @@ implements TaskDialog.DialogFinishListener{
 			@Override
 			public void getTasks(List<Task> loadedTasks) {
 
-//				if (loadedTasks != null){
 					unchekListView();
 					tasks.clear();
+					if (loadedTasks != null)
 					tasks.addAll(loadedTasks);
-//					tasks = loadedTasks;
 					Log.d(MainActivity.TAG, "Tasks loaded" + tasks.size());
 					updateUi();
-//				}
 
 			}
 		};
 		
 		if(MainActivity.getInstance() !=null)
-			AsyncLoadTasks.run(MainActivity.getInstance(), callBack);
+			AsyncLoadTasks.run(MainActivity.getInstance(), callBack, getCurrentTaskList());
 
 	}
 
@@ -412,8 +410,6 @@ implements TaskDialog.DialogFinishListener{
 
 			@Override
 			public void getTask(Task task) {
-				//				if(adapter!=null){
-				//					adapter.add(task);
 				tasks.add(0, task);
 				updateUi();
 				listView.clearChoices();

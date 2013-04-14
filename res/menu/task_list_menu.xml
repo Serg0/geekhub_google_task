@@ -10,9 +10,14 @@
         android:icon="@drawable/ic_delete"
         android:showAsAction="always" />
      
+     <item android:id="@+id/share"
+        android:icon="@drawable/ic_social"
+        android:showAsAction="always" />
+     
      <item android:id="@+id/refresh"
         android:icon="@drawable/ic_refresh"
         android:showAsAction="always" />
+     
      
      
      <!-- <item android:id="@+id/edit"

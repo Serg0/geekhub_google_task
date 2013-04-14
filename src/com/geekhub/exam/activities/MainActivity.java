@@ -246,12 +246,13 @@ public final class MainActivity extends SherlockFragmentActivity implements OnNa
 				String taskListID = TASKLIST_DEFAULT_NAME;
 				getSupportActionBar().setListNavigationCallbacks(adapter, instance);
 				getSupportActionBar().setSelectedNavigationItem(currentTaskListNumber);	
+				TaskList _taskList = null;
 				for (TaskList taskList : taskLists.getItems()) {
 					if(taskListsTitles.get(currentTaskListNumber) == taskList.getTitle())
 						taskListID = taskList.getId();
 				}
 				TasksFragment fr = new TasksFragment();
-				fr.getTasksFragment(taskListID);
+				fr.getTasksFragment(_taskList);
 			}
 		});
 	}
@@ -260,12 +261,14 @@ public final class MainActivity extends SherlockFragmentActivity implements OnNa
 	public boolean onNavigationItemSelected(int itemPosition, long itemId) {
 		currentTaskListNumber = itemPosition;
 		String taskListID = TASKLIST_DEFAULT_NAME;
+		TaskList _taskList = null;
 		TasksFragment fr = new TasksFragment();
 		for (TaskList taskList : taskLists.getItems()) {
 			if(taskListsTitles.get(currentTaskListNumber) == taskList.getTitle())
-				taskListID = taskList.getId();
+//				taskListID = taskList.getId();
+				_taskList = taskList;
 		}
-		fr.getTasksFragment(taskListID);
+		fr.getTasksFragment(_taskList);
 		getSupportFragmentManager().beginTransaction().replace(R.id.list, fr).commit();
 		return false;
 	}

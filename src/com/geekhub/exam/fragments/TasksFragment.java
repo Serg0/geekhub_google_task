@@ -3,6 +3,7 @@ package com.geekhub.exam.fragments;
 import java.util.ArrayList;
 import java.util.List;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.util.SparseBooleanArray;
@@ -36,6 +37,7 @@ import com.geekhub.exam.helpers.asyncTasks.AsyncUpdateTask;
 import com.geekhub.exam.helpers.asyncTasks.CommonAsyncTask.ProgressBar;
 import com.geekhub.exam.helpers.dialogs.TaskDialog;
 import com.google.api.services.tasks.model.Task;
+import com.google.api.services.tasks.model.TaskList;
 
 public class TasksFragment extends SherlockFragment
 implements TaskDialog.DialogFinishListener, MainActivity.RefreshCallBack, ProgressBar, ListViewCheckedListener{
@@ -51,10 +53,14 @@ implements TaskDialog.DialogFinishListener, MainActivity.RefreshCallBack, Progre
 
 	public static final String TASKLIST_DEFAULT_NAME = "@default";
 
-	static String ID = null;
+	static String ID = TASKLIST_DEFAULT_NAME;
+	static TaskList taskList;
 	
-	public TasksFragment getTasksFragment(String id) {
-		this.ID = id;
+	public TasksFragment getTasksFragment(TaskList taskList) {
+		if(taskList != null){
+			this.ID = TASKLIST_DEFAULT_NAME;
+			this.taskList = taskList;
+		}
 		return new TasksFragment();
 	}
 	
@@ -90,6 +96,12 @@ implements TaskDialog.DialogFinishListener, MainActivity.RefreshCallBack, Progre
 			deleteTasksAsync();
 			return true;
 		}
+		
+		case R.id.share:{
+			performShareAction();
+			return true;
+		}
+		
 		/*case R.id.edit:{
 
 //			editTaskDialog(getChoosenSingleItemPos());
@@ -115,6 +127,8 @@ implements TaskDialog.DialogFinishListener, MainActivity.RefreshCallBack, Progre
 
 		return super.onOptionsItemSelected(item);
 	}
+
+	
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, 
@@ -494,4 +508,37 @@ implements TaskDialog.DialogFinishListener, MainActivity.RefreshCallBack, Progre
 		editTaskUpdate(task, position);
 		
 	}
+	
+	private void performShareAction() {
+
+		String shareString = generateShareString();
+		
+		Intent sharingIntent = new Intent(android.content.Intent.ACTION_SEND);
+		sharingIntent.setType("text/plain");
+		sharingIntent.putExtra(android.content.Intent.EXTRA_TEXT, shareString);
+		startActivity(Intent.createChooser(sharingIntent, "Share TaskList via"));
+
+		
+	}
+
+	private String generateShareString() {
+		//TODO move Strings to string.xml
+		String completed, incompeted;
+		completed = "[v]";
+		incompeted = "[ ]";
+		String shareString = "";
+			shareString +="Task list:";
+			shareString +=taskList.getTitle()+"\n\n";
+			
+			for(Task task:tasks){
+				if(task.getStatus().equals(Constants.TASK_COMPLETED_KEY))
+					shareString += completed;
+				else
+					shareString += incompeted;
+				shareString+=" "+task.getTitle() + "\n";
+			}
+			shareString += "\n"+"published with GoogleTask\n"+"https://github.com/Serg0/geekhub_google_task";
+		return shareString;
+	}
+	
 }

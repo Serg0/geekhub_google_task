@@ -1,26 +1,20 @@
 package com.geekhub.exam.fragments;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.zip.Inflater;
 
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.util.SparseBooleanArray;
 import android.view.LayoutInflater;
-import android.view.TextureView;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.AdapterView.OnItemSelectedListener;
-import android.widget.ArrayAdapter;
 import android.widget.LinearLayout;
 import android.widget.ListView;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.actionbarsherlock.app.ActionBar;
@@ -40,40 +34,47 @@ import com.geekhub.exam.helpers.dialogs.TaskDialog;
 import com.google.api.services.tasks.model.Task;
 
 public class TasksFragment extends SherlockFragment
-					implements TaskDialog.DialogFinishListener{
-	
+implements TaskDialog.DialogFinishListener{
+
 	private TaskListArrayAdapter adapter;
 	private ListView listView;
 	private List<Task> tasks = new ArrayList<Task>();
 	private View view;
 	private LinearLayout lvFootterView;
-	
+
 	private MenuItem add, delete, edit, complete;
 	private ActionBar actionBar;
-	
+
 	public static final String TASKLIST_DEFAULT_NAME = "@default";
 
+	static String ID = null;
+	
+	public TasksFragment getTasksFragment(String id) {
+		this.ID = id;
+		return new TasksFragment();
+	}
+	
 	@Override
 	public void onCreate(Bundle savedInstanceState){
 		super.onCreate(savedInstanceState);
 		setHasOptionsMenu(true);
-		
+
 	}
 
 	@Override
 	public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
 		inflater.inflate(R.menu.task_list_menu, menu);
-		
+
 		add = menu.findItem(R.id.add);
 		delete = menu.findItem(R.id.delete);
 		edit = menu.findItem(R.id.edit);
 		complete =	menu.findItem(R.id.complete);
-		
+
 		edit.setVisible(false);
 		complete.setVisible(false);
 		delete.setVisible(false);
 	}
-	
+
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
@@ -81,33 +82,33 @@ public class TasksFragment extends SherlockFragment
 			addNewTask();
 			return true;
 		}
-			
+
 		case R.id.delete:{
 			deleteTasksAsync();
 			return true;
 		}
 		case R.id.edit:{
-			
+
 			editNewTask(getChoosenSingleItemPos());
-//				feachureUnderConstruction();
+			//				feachureUnderConstruction();
 			return true;
 		}
 		case R.id.complete:{
-				listView.clearChoices();
-				showToast("listView.clearChoices()");
+			listView.clearChoices();
+			showToast("listView.clearChoices()");
 			return true;
 		}
 		case R.id.menu_refresh:{
 			loadTaskListAsync();
-			
-		return true;
-	}
+
+			return true;
+		}
 
 		default:
 			break;
 		}
-		
-		
+
+
 		return super.onOptionsItemSelected(item);
 	}
 
@@ -124,7 +125,7 @@ public class TasksFragment extends SherlockFragment
 		initViews();
 		loadTaskListAsync();
 		initActionBar();
-/*		new Thread(new Runnable() {
+		/*		new Thread(new Runnable() {
 			@Override
 			public void run() {
 				try {
@@ -137,14 +138,14 @@ public class TasksFragment extends SherlockFragment
 		}).start();*/
 	}
 
-	
+
 
 
 	private void initActionBar() {
 		actionBar = getSherlockActivity().getSupportActionBar();
 		actionBar.setTitle(getCurrentTaskList());
-		
-		
+
+
 	}
 
 
@@ -156,30 +157,30 @@ public class TasksFragment extends SherlockFragment
 		public void onItemClick(AdapterView<?> arg0, View arg1, int arg2,
 				long arg3) {
 			updateActionBar();
-			
-			
+
+
 		}
-		
+
 	};
-	
+
 	private OnItemSelectedListener onItemSelectedListener = new OnItemSelectedListener() {
 
 		@Override
 		public void onItemSelected(AdapterView<?> arg0, View arg1,
 				int arg2, long arg3) {
 			updateActionBar();
-			
+
 		}
 
 		@Override
 		public void onNothingSelected(AdapterView<?> arg0) {
 			updateActionBar();
-			
+
 		}
 	};
-	
+
 	private void updateActionBar() {
-		
+
 		//TODO implement correct check
 		int checkedPositions = getChoosenItemsCount();
 		Log.d(MainActivity.TAG, "checkedPositions = " + checkedPositions);
@@ -201,16 +202,16 @@ public class TasksFragment extends SherlockFragment
 			complete.setVisible(false);
 			delete.setVisible(false);
 		};
-		
+
 	}
-	
+
 	private void initViews() {
-		
-		
+
+
 		/*lvFootterView = new TextView(getActivity());
 		lvFootterView.setText(getString(R.string.message_no_tasks));*/
 		lvFootterView = (LinearLayout) getView().inflate(getActivity(), R.layout.footter,null);
-		
+
 		listView = (ListView) getView().findViewById(R.id.list_tasts);
 		listView.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE);
 		listView.setOnItemClickListener(onItemClickListener);
@@ -232,8 +233,8 @@ public class TasksFragment extends SherlockFragment
 		});
 	}
 	private void updateUi(){
-		
-		
+
+
 		if(adapter != null){
 			adapter.notifyDataSetChanged();
 			Log.d(MainActivity.TAG, "adapter != null");
@@ -242,104 +243,104 @@ public class TasksFragment extends SherlockFragment
 			setUpListViewAdapter();
 		}
 		updateFooterState();
-		
+
 		adapter.notifyDataSetChanged();
-		
+
 	}
-	
+
 	private void updateFooterState(){
-		
+
 		int footterVisibility = View.GONE;
-		
+
 		if((tasks == null)||(tasks.size() == 0))
-				footterVisibility = View.VISIBLE;
-			
+			footterVisibility = View.VISIBLE;
+
 		lvFootterView.setVisibility(footterVisibility);
 	}
 	private void setUpListViewAdapter() {
-		
-			adapter = new TaskListArrayAdapter(getSherlockActivity(), tasks);
-			listView.setAdapter(adapter);
-			
+
+		adapter = new TaskListArrayAdapter(getSherlockActivity(), tasks);
+		listView.setAdapter(adapter);
+
 	}
 
-	
 
-	
+
+
 
 	private void showToast(String toastText) {
 		Toast.makeText(getActivity(), toastText , Toast.LENGTH_SHORT).show();
-		
+
 	}
 
 	private void feachureUnderConstruction() {
 		Toast.makeText(getActivity(), "Feachure is under constraction!" , Toast.LENGTH_SHORT).show();
-		
+
 	}
 
 	private void addNewTask() {
 		TaskDialog newTaskDialog = new TaskDialog(this, null);
 		newTaskDialog.show(getFragmentManager(), getTag());
-		
+
 	}
-	
+
 	private void editNewTask(final int taskPos) {
-		
+
 		TaskDialog.DialogFinishListener editListener = new TaskDialog.DialogFinishListener() {
-			
+
 			@Override
 			public void onFinishDialogAddTask(Task task) {
 				editTaskUpdate(task, taskPos);
-				
+
 			}
 
 		};
-		
+
 		TaskDialog newTaskDialog = new TaskDialog(editListener, tasks.get(taskPos));
 		newTaskDialog.show(getFragmentManager(), getTag());
-		
+
 	}
 
 	@Override
 	public void onFinishDialogAddTask(Task task) {
-		
+
 		addTaskAsync(task);
 	}
 
 	private String getCurrentTaskList(){
 		//TODO add get current tasklist processing
-		return TASKLIST_DEFAULT_NAME;
+		return ID;
 	}
-	
+
 	private List<Task> getChoosenItems(){
-		
+
 		SparseBooleanArray sparseBooleanArray = listView.getCheckedItemPositions();
 		int cntChoice = listView.getCount();
 		List<Task> tasks = new ArrayList<Task>();
 		for(int i = 0; i < cntChoice; ++i){
-			 
-            if(sparseBooleanArray.get(i)) {
 
-               tasks.add(this.tasks.get(i));
+			if(sparseBooleanArray.get(i)) {
 
-            }
+				tasks.add(this.tasks.get(i));
+
+			}
 		}
-		
+
 		return tasks;
 	}
-	
+
 	private int  getChoosenSingleItemPos(){
 		int pos = 0;
 		SparseBooleanArray sparseBooleanArray = listView.getCheckedItemPositions();
 		int cntChoice = listView.getCount();
 		for(int i = 0; i < cntChoice; ++i){
-			 
-            if(sparseBooleanArray.get(i)) {
-            	
-            	return i;
-            }
+
+			if(sparseBooleanArray.get(i)) {
+
+				return i;
+			}
 		}
-		
+
 		return -1;
 	}
 	private int  getChoosenItemsCount(){
@@ -348,77 +349,77 @@ public class TasksFragment extends SherlockFragment
 		int cntChoice = listView.getCount();
 		List<Task> tasks = new ArrayList<Task>();
 		for(int i = 0; i < cntChoice; ++i){
-			 
-            if(sparseBooleanArray.get(i)) {
-            	
-            	conut++;
-            }
+
+			if(sparseBooleanArray.get(i)) {
+
+				conut++;
+			}
 		}
-		
+
 		return conut;
 	}
-	
+
 	private void unchekListView(){
-		
+
 		SparseBooleanArray sparseBooleanArray = listView.getCheckedItemPositions();
 		int cntChoice = listView.getCount();
 		for(int i = 0; i < cntChoice; ++i){
-			 
-            if(sparseBooleanArray.get(i)) {
 
-            	listView.setItemChecked(i, false);
+			if(sparseBooleanArray.get(i)) {
 
-            }
+				listView.setItemChecked(i, false);
+
+			}
 		}
-		
+
 	}
 
-	
+
 	private void loadTaskListAsync() {
-		
+
 		AsyncLoadTasks.LoadTasksCallBack callBack = new AsyncLoadTasks.LoadTasksCallBack() {
-			
+
 			@Override
 			public void getTasks(List<Task> loadedTasks) {
-				
+
 				if (loadedTasks != null){
 					tasks.addAll(loadedTasks);
 					Log.d(MainActivity.TAG, "Tasks loaded" + tasks.size());
 					updateUi();
 				}
-				
+
 			}
 		};
 		AsyncLoadTasks.run(MainActivity.getInstance(), callBack);
-		
+
 	}
-	
+
 	private void addTaskAsync(Task task){
-		
+
 		AddTaskCallBack callBack = new AddTaskCallBack() {
-			
+
 			@Override
 			public void getTask(Task task) {
-//				if(adapter!=null){
-//					adapter.add(task);
-					tasks.add(0, task);
-					updateUi();
-					listView.clearChoices();
-					
-					
-//				}
-				
+				//				if(adapter!=null){
+				//					adapter.add(task);
+				tasks.add(0, task);
+				updateUi();
+				listView.clearChoices();
+
+
+				//				}
+
 			}
 		};
-		
+
 		AsyncAddTask.run(MainActivity.getInstance(), callBack, getCurrentTaskList(), task);
-		
+
 	}
-	
+
 	private void deleteTasksAsync() {
-		
+
 		AsyncDeleteTask.DeleteTaskCallBack callBack = new AsyncDeleteTask.DeleteTaskCallBack() {
-			
+
 			@Override
 			public void getTask(List<Task> deletedTasks) {
 				tasks.removeAll(deletedTasks);
@@ -427,15 +428,15 @@ public class TasksFragment extends SherlockFragment
 				unchekListView();
 			}
 		};
-		
+
 		AsyncDeleteTask.run(MainActivity.getInstance(), callBack, getCurrentTaskList(), getChoosenItems());
-		
+
 	}
-	
+
 	private void editTaskUpdate(Task task, final int taskPos) {
-		
+
 		AsyncUpdateTask.UpdateTaskCallBack callBack = new AsyncUpdateTask.UpdateTaskCallBack() {
-			
+
 			@Override
 			public void getTask(Task task) {
 				tasks.set(taskPos, task);
@@ -443,10 +444,10 @@ public class TasksFragment extends SherlockFragment
 				unchekListView();
 			}
 		};
-		
+
 		AsyncUpdateTask.run(MainActivity.getInstance(), callBack, getCurrentTaskList(), task);
-		
-		
+
+
 	}
-	
+
 }

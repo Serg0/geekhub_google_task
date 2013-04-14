@@ -15,6 +15,8 @@ package com.geekhub.exam.activities;
  */
 
 
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -29,21 +31,24 @@ import android.os.Bundle;
 import android.util.Log;
 import android.widget.ArrayAdapter;
 
+import com.actionbarsherlock.app.ActionBar.OnNavigationListener;
 import com.actionbarsherlock.app.SherlockFragmentActivity;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
 import com.geekhub.exam.R;
 import com.geekhub.exam.fragments.TasksFragment;
 import com.google.android.gms.common.GooglePlayServicesUtil;
-//import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.api.client.extensions.android.http.AndroidHttp;
 import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential;
 import com.google.api.client.http.HttpTransport;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.gson.GsonFactory;
 import com.google.api.services.tasks.TasksScopes;
+import com.google.api.services.tasks.model.TaskList;
+import com.google.api.services.tasks.model.TaskLists;
+//import com.google.android.gms.common.GooglePlayServicesUtil;
 
-public final class MainActivity extends SherlockFragmentActivity {
+public final class MainActivity extends SherlockFragmentActivity implements OnNavigationListener {
 
 	private static final Level LOGGING_LEVEL = Level.ALL;
 
@@ -73,6 +78,14 @@ public final class MainActivity extends SherlockFragmentActivity {
 
 	private static MainActivity instance;
 
+	public static final String TASKLIST_DEFAULT_NAME = "@default";
+
+	public TaskLists taskLists;
+
+	public static Integer currentTaskListNumber = 0;
+	
+	public List<String> taskListsTitles = new ArrayList<String>();
+
 	//	private ListView listView;
 
 	@Override
@@ -81,6 +94,7 @@ public final class MainActivity extends SherlockFragmentActivity {
 		Logger.getLogger("com.google.api.client").setLevel(LOGGING_LEVEL);
 		setContentView(R.layout.activity_main);
 
+		getSupportActionBar().setNavigationMode(getSupportActionBar().NAVIGATION_MODE_LIST);
 		instance = this;
 		// Google Accounts
 		credential = GoogleAccountCredential.usingOAuth2(getApplicationContext(), TasksScopes.TASKS);
@@ -91,9 +105,9 @@ public final class MainActivity extends SherlockFragmentActivity {
 		service = new com.google.api.services.tasks.Tasks.Builder(transport, jsonFactory, credential)
 		.setApplicationName("com.geekhub.exam").build();
 		Log.d(TAG, "Task client init");
-		
+
 	}
-	
+
 	public static MainActivity getInstance(){
 		return instance;
 	}
@@ -198,8 +212,58 @@ public final class MainActivity extends SherlockFragmentActivity {
 	}
 
 	private void startFragment() {
-		getSupportFragmentManager().beginTransaction().replace(R.id.list, new TasksFragment()).commit();
+		actionBar();
+		//		getSupportFragmentManager().beginTransaction().replace(R.id.list, new TasksFragment()).commit();
 
+	}
+	private void actionBar() {
+		new Thread(){
+			public void run(){
+				try {
+					taskLists = service.tasklists().list().execute();
+					for (TaskList taskList : taskLists.getItems()) {
+						taskListsTitles.add(taskList.getTitle().toString());
+					}
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+				if (taskListsTitles.size() != 0)
+					setActionBar();
+			}
+		}.start();
+	}
+
+	public void setActionBar() {
+		final ArrayAdapter<String> adapter = new ArrayAdapter<String>(instance,	android.R.layout.simple_list_item_1, taskListsTitles);
+		adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+		instance.runOnUiThread(new Runnable() {
+			@Override
+			public void run() {	
+				String taskListID = TASKLIST_DEFAULT_NAME;
+				getSupportActionBar().setListNavigationCallbacks(adapter, instance);
+				getSupportActionBar().setSelectedNavigationItem(currentTaskListNumber);	
+				for (TaskList taskList : taskLists.getItems()) {
+					if(taskListsTitles.get(currentTaskListNumber) == taskList.getTitle())
+						taskListID = taskList.getId();
+				}
+				TasksFragment fr = new TasksFragment();
+				fr.getTasksFragment(taskListID);
+			}
+		});
+	}
+
+	@Override
+	public boolean onNavigationItemSelected(int itemPosition, long itemId) {
+		currentTaskListNumber = itemPosition;
+		String taskListID = TASKLIST_DEFAULT_NAME;
+		TasksFragment fr = new TasksFragment();
+		for (TaskList taskList : taskLists.getItems()) {
+			if(taskListsTitles.get(currentTaskListNumber) == taskList.getTitle())
+				taskListID = taskList.getId();
+		}
+		fr.getTasksFragment(taskListID);
+		getSupportFragmentManager().beginTransaction().replace(R.id.list, fr).commit();
+		return false;
 	}
 
 }

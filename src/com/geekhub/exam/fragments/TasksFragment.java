@@ -24,6 +24,7 @@ import com.actionbarsherlock.view.MenuInflater;
 import com.actionbarsherlock.view.MenuItem;
 import com.geekhub.exam.R;
 import com.geekhub.exam.activities.MainActivity;
+import com.geekhub.exam.constants.OperationCodes;
 import com.geekhub.exam.helpers.TaskListArrayAdapter;
 import com.geekhub.exam.helpers.asyncTasks.AsyncAddTask;
 import com.geekhub.exam.helpers.asyncTasks.AsyncAddTask.AddTaskCallBack;
@@ -58,6 +59,8 @@ implements TaskDialog.DialogFinishListener{
 	public void onCreate(Bundle savedInstanceState){
 		super.onCreate(savedInstanceState);
 		setHasOptionsMenu(true);
+		if(MainActivity.getInstance() !=null)
+			MainActivity.getInstance().setRefreshCallBack(this);
 
 	}
 
@@ -79,7 +82,7 @@ implements TaskDialog.DialogFinishListener{
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
 		case R.id.add:{
-			addNewTask();
+			addNewTaskDialog();
 			return true;
 		}
 
@@ -89,12 +92,13 @@ implements TaskDialog.DialogFinishListener{
 		}
 		case R.id.edit:{
 
-			editNewTask(getChoosenSingleItemPos());
+//			editTaskDialog(getChoosenSingleItemPos());
 			//				feachureUnderConstruction();
 			return true;
 		}
 		case R.id.complete:{
 			listView.clearChoices();
+				adapter.notifyDataSetChanged();
 			showToast("listView.clearChoices()");
 			return true;
 		}
@@ -149,7 +153,18 @@ implements TaskDialog.DialogFinishListener{
 	}
 
 
+	OnItemLongClickListener onItemLongClickListener =	new OnItemLongClickListener() {
 
+		@Override
+		public boolean onItemLongClick(AdapterView<?> arg0, View arg1,
+				int pos, long arg3) {
+			if(tasks.size() >= pos){
+				editTaskDialog(pos);
+				return true;
+			}
+			return false;
+		}
+	};
 
 	private OnItemClickListener onItemClickListener = new OnItemClickListener() {
 
@@ -163,7 +178,7 @@ implements TaskDialog.DialogFinishListener{
 
 	};
 
-	private OnItemSelectedListener onItemSelectedListener = new OnItemSelectedListener() {
+	/*private OnItemSelectedListener onItemSelectedListener = new OnItemSelectedListener() {
 
 		@Override
 		public void onItemSelected(AdapterView<?> arg0, View arg1,
@@ -177,7 +192,7 @@ implements TaskDialog.DialogFinishListener{
 			updateActionBar();
 
 		}
-	};
+	};*/
 
 	private void updateActionBar() {
 
@@ -208,29 +223,18 @@ implements TaskDialog.DialogFinishListener{
 	private void initViews() {
 
 
-		/*lvFootterView = new TextView(getActivity());
-		lvFootterView.setText(getString(R.string.message_no_tasks));*/
 		lvFootterView = (LinearLayout) getView().inflate(getActivity(), R.layout.footter,null);
 
 		listView = (ListView) getView().findViewById(R.id.list_tasts);
 		listView.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE);
 		listView.setOnItemClickListener(onItemClickListener);
-		listView.setOnItemSelectedListener(onItemSelectedListener);
+//		listView.setOnItemSelectedListener(onItemSelectedListener);
+//		listView.setSelector(getResources().getDrawable(R.drawable.row_background));
 		listView.addFooterView(lvFootterView);
 		lvFootterView.setVisibility(View.GONE);
+		
 		updateFooterState();
-		listView.setOnItemLongClickListener(new OnItemLongClickListener() {
-
-			@Override
-			public boolean onItemLongClick(AdapterView<?> arg0, View arg1,
-					int pos, long arg3) {
-				if(tasks.size() <pos){
-					editNewTask(getChoosenSingleItemPos());
-					return true;
-				}
-				return false;
-			}
-		});
+		listView.setOnItemLongClickListener(onItemLongClickListener);
 	}
 	private void updateUi(){
 
@@ -278,33 +282,36 @@ implements TaskDialog.DialogFinishListener{
 
 	}
 
-	private void addNewTask() {
-		TaskDialog newTaskDialog = new TaskDialog(this, null);
+	private void addNewTaskDialog() {
+		TaskDialog newTaskDialog = new TaskDialog(this, OperationCodes.ADD_TASK);
 		newTaskDialog.show(getFragmentManager(), getTag());
 
 	}
 
-	private void editNewTask(final int taskPos) {
-
-		TaskDialog.DialogFinishListener editListener = new TaskDialog.DialogFinishListener() {
-
-			@Override
-			public void onFinishDialogAddTask(Task task) {
-				editTaskUpdate(task, taskPos);
-
-			}
-
-		};
-
-		TaskDialog newTaskDialog = new TaskDialog(editListener, tasks.get(taskPos));
+	private void editTaskDialog(int taskPos) {
+				
+		TaskDialog newTaskDialog = new TaskDialog(this, tasks.get(taskPos), taskPos, OperationCodes.UPDATE_TASK);
 		newTaskDialog.show(getFragmentManager(), getTag());
-
+		
 	}
 
 	@Override
-	public void onFinishDialogAddTask(Task task) {
+	public void onFinishTaskDialog(Task task, int taskPos, int operationCode) {
 
-		addTaskAsync(task);
+		switch (operationCode) {
+		case OperationCodes.ADD_TASK:
+			addTaskAsync(task);
+			break;
+
+		case OperationCodes.UPDATE_TASK:
+			editTaskUpdate(task, taskPos);
+			break;
+
+		default:
+			break;
+		}
+		
+
 	}
 
 	private String getCurrentTaskList(){
@@ -329,8 +336,8 @@ implements TaskDialog.DialogFinishListener{
 		return tasks;
 	}
 
-	private int  getChoosenSingleItemPos(){
-		int pos = 0;
+	/*private int  getChoosenSingleItemPos(){
+
 		SparseBooleanArray sparseBooleanArray = listView.getCheckedItemPositions();
 		int cntChoice = listView.getCount();
 		for(int i = 0; i < cntChoice; ++i){
@@ -342,12 +349,12 @@ implements TaskDialog.DialogFinishListener{
 		}
 
 		return -1;
-	}
+	}*/
 	private int  getChoosenItemsCount(){
 		int conut = 0;
 		SparseBooleanArray sparseBooleanArray = listView.getCheckedItemPositions();
 		int cntChoice = listView.getCount();
-		List<Task> tasks = new ArrayList<Task>();
+
 		for(int i = 0; i < cntChoice; ++i){
 
 			if(sparseBooleanArray.get(i)) {
@@ -382,15 +389,20 @@ implements TaskDialog.DialogFinishListener{
 			@Override
 			public void getTasks(List<Task> loadedTasks) {
 
-				if (loadedTasks != null){
+//				if (loadedTasks != null){
+					unchekListView();
+					tasks.clear();
 					tasks.addAll(loadedTasks);
+//					tasks = loadedTasks;
 					Log.d(MainActivity.TAG, "Tasks loaded" + tasks.size());
 					updateUi();
-				}
+//				}
 
 			}
 		};
-		AsyncLoadTasks.run(MainActivity.getInstance(), callBack);
+		
+		if(MainActivity.getInstance() !=null)
+			AsyncLoadTasks.run(MainActivity.getInstance(), callBack);
 
 	}
 
@@ -412,7 +424,8 @@ implements TaskDialog.DialogFinishListener{
 			}
 		};
 
-		AsyncAddTask.run(MainActivity.getInstance(), callBack, getCurrentTaskList(), task);
+		if(MainActivity.getInstance() !=null)
+			AsyncAddTask.run(MainActivity.getInstance(), callBack, getCurrentTaskList(), task);
 
 	}
 
@@ -429,7 +442,8 @@ implements TaskDialog.DialogFinishListener{
 			}
 		};
 
-		AsyncDeleteTask.run(MainActivity.getInstance(), callBack, getCurrentTaskList(), getChoosenItems());
+		if(MainActivity.getInstance() !=null)
+			AsyncDeleteTask.run(MainActivity.getInstance(), callBack, getCurrentTaskList(), getChoosenItems());
 
 	}
 
@@ -445,9 +459,29 @@ implements TaskDialog.DialogFinishListener{
 			}
 		};
 
-		AsyncUpdateTask.run(MainActivity.getInstance(), callBack, getCurrentTaskList(), task);
+		if(MainActivity.getInstance() !=null)
+			AsyncUpdateTask.run(MainActivity.getInstance(), callBack, getCurrentTaskList(), task);
 
 
 	}
 
+	@Override
+	public void refresh() {
+		
+		loadTaskListAsync();
+		
+	}
+
+	@Override
+	public void accountChanged() {
+//		tasks.clear();
+		loadTaskListAsync();
+	}
+	
+	@Override
+	public void onDestroy() {
+		if(MainActivity.getInstance() !=null)
+			MainActivity.getInstance().removeRefreshCallBack();
+		super.onDestroy();
+	}
 }

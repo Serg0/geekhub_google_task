@@ -5,14 +5,20 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.geekhub.exam.R;
+import com.geekhub.exam.constants.Constants;
 
 import android.content.Context;
+import android.graphics.Paint;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.CheckBox;
+import android.widget.CheckedTextView;
+import android.widget.CompoundButton;
+import android.widget.CompoundButton.OnCheckedChangeListener;
+import android.widget.TextView;
 
 import com.google.api.client.json.JsonFactory;
 import com.google.api.services.tasks.model.Task;
@@ -39,7 +45,8 @@ public class TaskListArrayAdapter extends ArrayAdapter<Task> {
 			count = tasks.size();
 		return count;
 	}
-
+	
+	
 	@Override
 	public View getView(int position, View convertView, ViewGroup parent) {
 
@@ -49,17 +56,39 @@ public class TaskListArrayAdapter extends ArrayAdapter<Task> {
 		if (row == null) {
 			LayoutInflater inflater = (LayoutInflater) context
 					.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-			row = inflater.inflate(R.layout.list_menu_item_checkbox, parent,
+			row = inflater.inflate(R.layout.listview_row_custom, parent,
 					false);
 		}
 		
 		CheckBox checkbox = (CheckBox) row.findViewById(R.id.checkbox);
+		TextView mainRow  = (TextView) row.findViewById(R.id.mainRow);
+		
+		
 		Task task  = tasks.get(position);
 		String taskName =	task.getTitle();
 		Log.d("TaskListArrayAdapter", taskName);
-		checkbox.setText(taskName);
+		if(task.getStatus().equals(Constants.TASK_COMPLETED_KEY)){
+			mainRow.setPaintFlags(checkbox.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
+			checkbox.setChecked(true);
+		}else
+		{
+			mainRow.setPaintFlags(checkbox.getPaintFlags() & (~ Paint.STRIKE_THRU_TEXT_FLAG));
+			checkbox.setChecked(false);
+		}
+		
+		checkbox.setOnCheckedChangeListener(new OnCheckedChangeListener() {
+			
+			@Override
+			public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+				
+				
+			}
+		});
+		mainRow.setText(taskName);
 
+				
 		return row;
 	}
 
+	
 }

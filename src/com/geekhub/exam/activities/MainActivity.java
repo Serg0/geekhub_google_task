@@ -66,7 +66,7 @@ public final class MainActivity extends SherlockFragmentActivity implements OnNa
 
 	final JsonFactory jsonFactory = new GsonFactory();
 
-	GoogleAccountCredential credential;
+	public GoogleAccountCredential credential;
 
 	public List<String> tasksList;
 
@@ -79,6 +79,7 @@ public final class MainActivity extends SherlockFragmentActivity implements OnNa
 	private static MainActivity instance;
 
 	public static final String TASKLIST_DEFAULT_NAME = "@default";
+	private RefreshCallBack refreshCallBack;
 
 	public TaskLists taskLists;
 
@@ -97,14 +98,17 @@ public final class MainActivity extends SherlockFragmentActivity implements OnNa
 		getSupportActionBar().setNavigationMode(getSupportActionBar().NAVIGATION_MODE_LIST);
 		instance = this;
 		// Google Accounts
-		credential = GoogleAccountCredential.usingOAuth2(getApplicationContext(), TasksScopes.TASKS);
+		credential = GoogleAccountCredential.usingOAuth2(this, TasksScopes.TASKS);
 		SharedPreferences settings = getPreferences(Context.MODE_PRIVATE);
 		credential.setSelectedAccountName(settings.getString(PREF_ACCOUNT_NAME, null));
 
 		// Tasks client
 		service = new com.google.api.services.tasks.Tasks.Builder(transport, jsonFactory, credential)
 		.setApplicationName("com.geekhub.exam").build();
+		
+		
 		Log.d(TAG, "Task client init");
+		startFragment();
 
 	}
 
@@ -147,7 +151,7 @@ public final class MainActivity extends SherlockFragmentActivity implements OnNa
 			break;
 		case REQUEST_AUTHORIZATION:
 			if (resultCode == Activity.RESULT_OK) {
-				startFragment();
+				sendRefreshNotification();
 			} else {
 				chooseAccount();
 			}
@@ -161,7 +165,7 @@ public final class MainActivity extends SherlockFragmentActivity implements OnNa
 					SharedPreferences.Editor editor = settings.edit();
 					editor.putString(PREF_ACCOUNT_NAME, accountName);
 					editor.commit();
-					startFragment();
+					sendAccountChanged();
 				}
 			}
 			break;
@@ -178,7 +182,7 @@ public final class MainActivity extends SherlockFragmentActivity implements OnNa
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
 		case R.id.menu_refresh:
-			startFragment();
+			sendRefreshNotification();
 			break;
 		case R.id.menu_accounts:
 			chooseAccount();
@@ -203,7 +207,7 @@ public final class MainActivity extends SherlockFragmentActivity implements OnNa
 			// ask user to choose account
 			chooseAccount();
 		} else {
-			startFragment();
+			sendRefreshNotification();
 		}
 	}
 
@@ -265,5 +269,34 @@ public final class MainActivity extends SherlockFragmentActivity implements OnNa
 		getSupportFragmentManager().beginTransaction().replace(R.id.list, fr).commit();
 		return false;
 	}
+	
+	private void sendAccountChanged(){
+		if(refreshCallBack != null)
+			refreshCallBack.accountChanged();
+		
+	}
+	private void sendRefreshNotification(){
+		
+		
+		//TODO temporary disabled to prevent overabundant downloads
+		/*if(refreshCallBack != null)
+			refreshCallBack.refresh();
+		*/
+	}
+	public void setRefreshCallBack(RefreshCallBack refreshCallBack){
+		
+		this.refreshCallBack = refreshCallBack;
+		
+	}
+	
+	public void removeRefreshCallBack(){
+		
+		this.refreshCallBack = null;
+		
+	}
 
+	public interface RefreshCallBack{
+		public void refresh();
+		public void accountChanged();
+	};
 }

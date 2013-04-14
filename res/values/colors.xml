@@ -18,4 +18,8 @@
     <color name="title_background">#ff355689</color>
     <color name="title_text">#ffffffff</color>
     <color name="title_separator">#40ffffff</color>
+    
+    <color name="pressed">#ff33b5e5</color>
+    <color name="selected">#ff33b5e5</color>
+    <color name="unselected">#00FFFFFF</color>
 </resources>

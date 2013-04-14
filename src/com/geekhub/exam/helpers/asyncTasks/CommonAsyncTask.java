@@ -52,6 +52,7 @@ protected String TAG = CommonAsyncTask.class.getSimpleName();
   @Override
   protected void onPreExecute() {
     super.onPreExecute();
+    Log.d(TAG, getClass().getSimpleName() + "task started");
     activity.numAsyncTasks++;
     progressBar = ProgressDialog.show(activity, null,activity.getString(R.string.progress_dialog_processing),true, false);
   }
@@ -59,6 +60,7 @@ protected String TAG = CommonAsyncTask.class.getSimpleName();
   @Override
   protected final Boolean doInBackground(Void... ignored) {
 	  Log.d(TAG, "doInBackground");
+	  if(activity.credential.getSelectedAccountName() != null)
     try {
       doInBackground();
       return true;

@@ -25,6 +25,6 @@
     <string name="message_no_tasks">There no tasks in this list.\nPress \"+\" to add one.</string>
     
     
-    
+   <string name="deleted_tag"><del>%s</del></string>
     
 </resources>

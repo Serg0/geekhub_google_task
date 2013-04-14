@@ -27,13 +27,15 @@ public class TaskListArrayAdapter extends ArrayAdapter<Task> {
 
 	private List<Task> tasks;
 	private Context context;
-
-	public TaskListArrayAdapter(Context context, List<Task> tasks) {
+	private ListViewCheckedListener checkedListener;
+	
+	public TaskListArrayAdapter(Context context, List<Task> tasks, ListViewCheckedListener checkedListener) {
 		super(context, R.layout.item, tasks);
 		if(tasks == null)
 			tasks = new ArrayList<Task>();
 		this.tasks = tasks;
 		this.context = context;
+		this.checkedListener = checkedListener;
 	}
 	
 	@Override
@@ -48,7 +50,7 @@ public class TaskListArrayAdapter extends ArrayAdapter<Task> {
 	
 	
 	@Override
-	public View getView(int position, View convertView, ViewGroup parent) {
+	public View getView(final int position, View convertView, ViewGroup parent) {
 
 		View row = convertView;
 		
@@ -64,9 +66,10 @@ public class TaskListArrayAdapter extends ArrayAdapter<Task> {
 		TextView mainRow  = (TextView) row.findViewById(R.id.mainRow);
 		
 		
-		Task task  = tasks.get(position);
+		final Task task  = tasks.get(position);
 		String taskName =	task.getTitle();
 		Log.d("TaskListArrayAdapter", taskName);
+		Log.d("TaskListArrayAdapter", task.toString());
 		if(task.getStatus().equals(Constants.TASK_COMPLETED_KEY)){
 			mainRow.setPaintFlags(checkbox.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
 			checkbox.setChecked(true);
@@ -81,7 +84,7 @@ public class TaskListArrayAdapter extends ArrayAdapter<Task> {
 			@Override
 			public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
 				
-				
+				checkedListener.checkStateChanged(task, position, isChecked);
 			}
 		});
 		mainRow.setText(taskName);
@@ -90,5 +93,8 @@ public class TaskListArrayAdapter extends ArrayAdapter<Task> {
 		return row;
 	}
 
+	public interface ListViewCheckedListener{
+			void checkStateChanged(Task task, int pos, boolean isChecked);
+	}
 	
 }

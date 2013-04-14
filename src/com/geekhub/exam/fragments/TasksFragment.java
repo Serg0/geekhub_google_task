@@ -24,8 +24,10 @@ import com.actionbarsherlock.view.MenuInflater;
 import com.actionbarsherlock.view.MenuItem;
 import com.geekhub.exam.R;
 import com.geekhub.exam.activities.MainActivity;
+import com.geekhub.exam.constants.Constants;
 import com.geekhub.exam.constants.OperationCodes;
 import com.geekhub.exam.helpers.TaskListArrayAdapter;
+import com.geekhub.exam.helpers.TaskListArrayAdapter.ListViewCheckedListener;
 import com.geekhub.exam.helpers.asyncTasks.AsyncAddTask;
 import com.geekhub.exam.helpers.asyncTasks.AsyncAddTask.AddTaskCallBack;
 import com.geekhub.exam.helpers.asyncTasks.AsyncDeleteTask;
@@ -36,7 +38,7 @@ import com.geekhub.exam.helpers.dialogs.TaskDialog;
 import com.google.api.services.tasks.model.Task;
 
 public class TasksFragment extends SherlockFragment
-implements TaskDialog.DialogFinishListener, MainActivity.RefreshCallBack, ProgressBar{
+implements TaskDialog.DialogFinishListener, MainActivity.RefreshCallBack, ProgressBar, ListViewCheckedListener{
 
 	private TaskListArrayAdapter adapter;
 	private ListView listView;
@@ -221,15 +223,18 @@ implements TaskDialog.DialogFinishListener, MainActivity.RefreshCallBack, Progre
 	}
 	private void updateUi(){
 
+		//TODO temporary disabled due completed\incompleted representation bug on new task add
 
-		if(adapter != null){
+		/*if(adapter != null){
 			adapter.notifyDataSetChanged();
 			Log.d(MainActivity.TAG, "adapter != null");
 		}else{
-			Log.d(MainActivity.TAG, "adapter == null");
+			Log.d(MainActivity.TAG, "adapter == null");*/
 			setUpListViewAdapter();
-		}
+//		}
 		updateFooterState();
+		listView.clearChoices();
+		updateActionBar();
 
 		adapter.notifyDataSetChanged();
 
@@ -246,7 +251,7 @@ implements TaskDialog.DialogFinishListener, MainActivity.RefreshCallBack, Progre
 	}
 	private void setUpListViewAdapter() {
 
-		adapter = new TaskListArrayAdapter(getSherlockActivity(), tasks);
+		adapter = new TaskListArrayAdapter(getSherlockActivity(), tasks, this);
 		listView.setAdapter(adapter);
 
 	}
@@ -475,5 +480,18 @@ implements TaskDialog.DialogFinishListener, MainActivity.RefreshCallBack, Progre
 		}
 			
 			
+	}
+
+	@Override
+	public void checkStateChanged(Task task, int position, boolean isChecked) {
+		if(isChecked){
+			task.setStatus(Constants.TASK_COMPLETED_KEY);
+		}else{
+			task.setStatus(Constants.TASK_NEEDSACTION_KEY);
+			task.setCompleted(null);
+		}
+		
+		editTaskUpdate(task, position);
+		
 	}
 }

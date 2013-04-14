@@ -22,6 +22,7 @@ import com.geekhub.exam.activities.MainActivity;
 import com.geekhub.exam.utils.Utils;
 import com.google.api.client.googleapis.extensions.android.gms.auth.GooglePlayServicesAvailabilityIOException;
 import com.google.api.client.googleapis.extensions.android.gms.auth.UserRecoverableAuthIOException;
+import com.google.api.services.tasks.model.Task;
 
 import android.app.ProgressDialog;
 import android.os.AsyncTask;
@@ -36,16 +37,18 @@ import java.io.IOException;
  * 
  * @author Yaniv Inbar
  */
-abstract class CommonAsyncTask extends AsyncTask<Void, Void, Boolean> {
+public abstract class CommonAsyncTask extends AsyncTask<Void, Void, Boolean> {
 
- final  MainActivity activity;
- final  com.google.api.services.tasks.Tasks client;
-  private ProgressDialog progressBar;
-protected String TAG = CommonAsyncTask.class.getSimpleName();
+	final  MainActivity activity;
+ 	final  com.google.api.services.tasks.Tasks client;
+// 	private ProgressDialog progressBar;
+ 	protected String TAG = CommonAsyncTask.class.getSimpleName();
+	private ProgressBar progress;
 
-  CommonAsyncTask(MainActivity activity) {
+  CommonAsyncTask(MainActivity activity, ProgressBar progress) {
     this.activity = activity;
     client = activity.service;
+    this.progress = progress;
    
   }
 
@@ -54,7 +57,10 @@ protected String TAG = CommonAsyncTask.class.getSimpleName();
     super.onPreExecute();
     Log.d(TAG, getClass().getSimpleName() + "task started");
     activity.numAsyncTasks++;
-    progressBar = ProgressDialog.show(activity, null,activity.getString(R.string.progress_dialog_processing),true, false);
+    
+    if(progress != null)
+    	progress.showProgressDialog(true);
+   /* progressBar = ProgressDialog.show(activity, null,activity.getString(R.string.progress_dialog_processing),true, false);*/
   }
 
   @Override
@@ -87,7 +93,8 @@ protected String TAG = CommonAsyncTask.class.getSimpleName();
   protected void onPostExecute(Boolean success) {
     super.onPostExecute(success);
     if (0 == --activity.numAsyncTasks) {
-      progressBar.dismiss();
+    	  if(progress != null)
+    		  progress.showProgressDialog(false);
     }
     if (success) 
 			onSuccess();
@@ -95,18 +102,26 @@ protected String TAG = CommonAsyncTask.class.getSimpleName();
 
   @Override
 	protected void finalize() throws Throwable {
-	  if(progressBar != null)
-		  progressBar.dismiss();
+	 /* if(progress != null)
+		  progress.showProgressDialog(false);*/
 	  Log.d(TAG, "Task finalized");
 		super.finalize();
 	}
+  
   @Override
 	protected void onCancelled() {
-	  if(progressBar != null)
-		  progressBar.dismiss();
-	  Log.d(TAG, "Task canseled");
+	 /* if(progress != null)
+		  progress.showProgressDialog(false);*/
+	  Log.d(TAG, "Task cancelled");
 		super.onCancelled();
 	}
   abstract protected void doInBackground() throws IOException;
   abstract protected void onSuccess();
+  
+  public interface ProgressBar{
+		void showProgressDialog(boolean show);
+		
+  }
+  
+  
 }

@@ -10,12 +10,17 @@
         android:icon="@drawable/ic_delete"
         android:showAsAction="always" />
      
-     <item android:id="@+id/edit"
+     <item android:id="@+id/refresh"
+        android:icon="@drawable/ic_refresh"
+        android:showAsAction="always" />
+     
+     
+     <!-- <item android:id="@+id/edit"
         android:icon="@drawable/ic_edit"
         android:showAsAction="always" />
      
       <item android:id="@+id/complete"
         android:icon="@drawable/ic_complete"
-        android:showAsAction="always" />
+        android:showAsAction="always" /> -->
     
 </menu>

@@ -31,11 +31,12 @@ import com.geekhub.exam.helpers.asyncTasks.AsyncAddTask.AddTaskCallBack;
 import com.geekhub.exam.helpers.asyncTasks.AsyncDeleteTask;
 import com.geekhub.exam.helpers.asyncTasks.AsyncLoadTasks;
 import com.geekhub.exam.helpers.asyncTasks.AsyncUpdateTask;
+import com.geekhub.exam.helpers.asyncTasks.CommonAsyncTask.ProgressBar;
 import com.geekhub.exam.helpers.dialogs.TaskDialog;
 import com.google.api.services.tasks.model.Task;
 
 public class TasksFragment extends SherlockFragment
-implements TaskDialog.DialogFinishListener, MainActivity.RefreshCallBack{
+implements TaskDialog.DialogFinishListener, MainActivity.RefreshCallBack, ProgressBar{
 
 	private TaskListArrayAdapter adapter;
 	private ListView listView;
@@ -43,7 +44,7 @@ implements TaskDialog.DialogFinishListener, MainActivity.RefreshCallBack{
 	private View view;
 	private LinearLayout lvFootterView;
 
-	private MenuItem add, delete, edit, complete;
+	private MenuItem add, delete, refresh;
 	private ActionBar actionBar;
 
 	public static final String TASKLIST_DEFAULT_NAME = "@default";
@@ -68,13 +69,10 @@ implements TaskDialog.DialogFinishListener, MainActivity.RefreshCallBack{
 	public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
 		inflater.inflate(R.menu.task_list_menu, menu);
 
-		add = menu.findItem(R.id.add);
-		delete = menu.findItem(R.id.delete);
-		edit = menu.findItem(R.id.edit);
-		complete =	menu.findItem(R.id.complete);
-
-		edit.setVisible(false);
-		complete.setVisible(false);
+		add 		= menu.findItem(R.id.add);
+		delete 		= menu.findItem(R.id.delete);
+		refresh 	= menu.findItem(R.id.refresh);
+			
 		delete.setVisible(false);
 	}
 
@@ -90,19 +88,19 @@ implements TaskDialog.DialogFinishListener, MainActivity.RefreshCallBack{
 			deleteTasksAsync();
 			return true;
 		}
-		case R.id.edit:{
+		/*case R.id.edit:{
 
 //			editTaskDialog(getChoosenSingleItemPos());
 			//				feachureUnderConstruction();
 			return true;
-		}
-		case R.id.complete:{
+		}*/
+		/*case R.id.complete:{
 			listView.clearChoices();
-				adapter.notifyDataSetChanged();
+			adapter.notifyDataSetChanged();
 			showToast("listView.clearChoices()");
 			return true;
-		}
-		case R.id.menu_refresh:{
+		}*/
+		case R.id.refresh:{
 			loadTaskListAsync();
 
 			return true;
@@ -148,7 +146,7 @@ implements TaskDialog.DialogFinishListener, MainActivity.RefreshCallBack{
 	private void initActionBar() {
 		actionBar = getSherlockActivity().getSupportActionBar();
 		actionBar.setTitle(getCurrentTaskList());
-
+		
 
 	}
 
@@ -199,22 +197,9 @@ implements TaskDialog.DialogFinishListener, MainActivity.RefreshCallBack{
 		//TODO implement correct check
 		int checkedPositions = getChoosenItemsCount();
 		Log.d(MainActivity.TAG, "checkedPositions = " + checkedPositions);
-		if(checkedPositions == 0){
-			edit.setVisible(false);
-			complete.setVisible(false);
-			delete.setVisible(false);
-		}else if (checkedPositions == 1){
-			edit.setVisible(true);
-			complete.setVisible(true); 
+		if(checkedPositions > 0){
 			delete.setVisible(true);
-		}else if(checkedPositions > 1)
-		{
-			edit.setVisible(false);
-			complete.setVisible(true); 
-			delete.setVisible(true);
-		}else if(checkedPositions < 0){
-			edit.setVisible(false);
-			complete.setVisible(false);
+		}else{
 			delete.setVisible(false);
 		};
 
@@ -228,8 +213,6 @@ implements TaskDialog.DialogFinishListener, MainActivity.RefreshCallBack{
 		listView = (ListView) getView().findViewById(R.id.list_tasts);
 		listView.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE);
 		listView.setOnItemClickListener(onItemClickListener);
-//		listView.setOnItemSelectedListener(onItemSelectedListener);
-//		listView.setSelector(getResources().getDrawable(R.drawable.row_background));
 		listView.addFooterView(lvFootterView);
 		lvFootterView.setVisibility(View.GONE);
 		
@@ -400,7 +383,7 @@ implements TaskDialog.DialogFinishListener, MainActivity.RefreshCallBack{
 		};
 		
 		if(MainActivity.getInstance() !=null)
-			AsyncLoadTasks.run(MainActivity.getInstance(), callBack, getCurrentTaskList());
+			AsyncLoadTasks.run(MainActivity.getInstance(), this, callBack, getCurrentTaskList());
 
 	}
 
@@ -421,7 +404,7 @@ implements TaskDialog.DialogFinishListener, MainActivity.RefreshCallBack{
 		};
 
 		if(MainActivity.getInstance() !=null)
-			AsyncAddTask.run(MainActivity.getInstance(), callBack, getCurrentTaskList(), task);
+			AsyncAddTask.run(MainActivity.getInstance(), this, callBack, getCurrentTaskList(), task);
 
 	}
 
@@ -439,7 +422,7 @@ implements TaskDialog.DialogFinishListener, MainActivity.RefreshCallBack{
 		};
 
 		if(MainActivity.getInstance() !=null)
-			AsyncDeleteTask.run(MainActivity.getInstance(), callBack, getCurrentTaskList(), getChoosenItems());
+			AsyncDeleteTask.run(MainActivity.getInstance(), this, callBack, getCurrentTaskList(), getChoosenItems());
 
 	}
 
@@ -456,7 +439,7 @@ implements TaskDialog.DialogFinishListener, MainActivity.RefreshCallBack{
 		};
 
 		if(MainActivity.getInstance() !=null)
-			AsyncUpdateTask.run(MainActivity.getInstance(), callBack, getCurrentTaskList(), task);
+			AsyncUpdateTask.run(MainActivity.getInstance(),this, callBack, getCurrentTaskList(), task);
 
 
 	}
@@ -479,5 +462,18 @@ implements TaskDialog.DialogFinishListener, MainActivity.RefreshCallBack{
 		if(MainActivity.getInstance() !=null)
 			MainActivity.getInstance().removeRefreshCallBack();
 		super.onDestroy();
+	}
+	
+	public void showProgressDialog(boolean show){
+
+		if(show){
+			refresh.setActionView(R.layout.progress_bar);
+			refresh.expandActionView();
+		}else{
+			refresh.setActionView(null);
+			refresh.collapseActionView();
+		}
+			
+			
 	}
 }

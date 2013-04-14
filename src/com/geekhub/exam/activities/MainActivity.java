@@ -181,9 +181,9 @@ public final class MainActivity extends SherlockFragmentActivity implements OnNa
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
-		case R.id.menu_refresh:
+		/*case R.id.menu_refresh:
 			sendRefreshNotification();
-			break;
+			break;*/
 		case R.id.menu_accounts:
 			chooseAccount();
 			return true;

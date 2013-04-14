@@ -38,39 +38,25 @@ public class AsyncAddTask extends CommonAsyncTask {
 	private AddTaskCallBack callBack;
 	private String taskListID = Constants.DEFAULT_KEY;
 	
-	AsyncAddTask(MainActivity activity, AddTaskCallBack callBack, Task task) {
-		this(activity, callBack);
-		this.task = task;
-	}
-	
-	AsyncAddTask(MainActivity activity, AddTaskCallBack callBack, String taskListID, Task task) {
-		this(activity, callBack);
-		this.taskListID = taskListID;
-		this.task = task;
-	}
-	
-	AsyncAddTask(MainActivity activity, AddTaskCallBack callBack) {
-		super(activity);
+	AsyncAddTask(MainActivity activity, ProgressBar progress,  AddTaskCallBack callBack, String taskListID, Task task) {
+		super(activity, progress);
+		if(taskListID != null)
+			this.taskListID = taskListID;
+		if(task != null)
+			this.task = task;
+		else
+			generateDefaultTask();
+		
 		this.callBack = callBack;
-		
 	}
-
+	
 	protected void doInBackground() throws IOException {
-		
-//		try {
-			task  = client.tasks().insert(taskListID, task).execute();
-		/*} catch (IOException e) {
-			String message = e.getMessage();
-			if(message != null)
-				Utils.showError(activity, message);
-			else
-				Utils.showError(activity, activity.getString(R.string.error_unknown_io_error));
-			e.printStackTrace();
-		}*/
+
+		task  = client.tasks().insert(taskListID, task).execute();
 	}
 
-	public static void run(MainActivity tasksSample,AddTaskCallBack callBack, String taskListID, Task task) {
-		new AsyncAddTask(tasksSample, callBack, taskListID, task).execute();
+	public static void run(MainActivity tasksSample, ProgressBar progress, AddTaskCallBack callBack, String taskListID, Task task) {
+		new AsyncAddTask(tasksSample,progress, callBack, taskListID, task).execute();
 	}
 
 	@Override

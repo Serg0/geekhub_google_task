@@ -1,5 +1,4 @@
 
-
 /*
  * Copyright (c) 2012 Google Inc.
  * 
@@ -20,6 +19,7 @@ import com.geekhub.exam.R;
 import com.geekhub.exam.R.string;
 import com.geekhub.exam.activities.MainActivity;
 import com.geekhub.exam.constants.Constants;
+import com.geekhub.exam.helpers.asyncTasks.CommonAsyncTask.ProgressBar;
 import com.geekhub.exam.utils.Utils;
 import com.google.api.services.tasks.model.Task;
 
@@ -37,46 +37,41 @@ public class AsyncUpdateTask extends CommonAsyncTask {
 	private Task task;
 	private UpdateTaskCallBack callBack;
 	private String taskListID = Constants.DEFAULT_KEY;
-	
-	AsyncUpdateTask(MainActivity activity, UpdateTaskCallBack callBack, Task task) {
-		this(activity, callBack);
+
+	AsyncUpdateTask(MainActivity activity, ProgressBar progress,
+			UpdateTaskCallBack callBack, String taskListID, Task task) {
+		super(activity, progress);
+		if(taskListID != null)
+			this.taskListID = taskListID;
 		this.task = task;
-	}
-	
-	AsyncUpdateTask(MainActivity activity, UpdateTaskCallBack callBack, String taskListID, Task task) {
-		this(activity, callBack);
-		this.taskListID = taskListID;
-		this.task = task;
-	}
-	
-	AsyncUpdateTask(MainActivity activity, UpdateTaskCallBack callBack) {
-		super(activity);
 		this.callBack = callBack;
-		
 	}
 
 	protected void doInBackground() throws IOException {
-		
-			task  = client.tasks().update(taskListID, task.getId(), task).execute();
-		
+
+		task = client.tasks().update(taskListID, task.getId(), task).execute();
+
 	}
 
-	public static void run(MainActivity tasksSample, UpdateTaskCallBack callBack,String taskListID, Task task) {
-		new AsyncUpdateTask(tasksSample, callBack,taskListID, task).execute();
+	public static void run(MainActivity activity, ProgressBar progress,
+			UpdateTaskCallBack callBack, String taskListID, Task task) {
+		new AsyncUpdateTask(activity, progress, callBack, taskListID, task)
+				.execute();
 	}
 
 	@Override
 	protected void onSuccess() {
-		if(callBack != null)
+		if (callBack != null)
 			callBack.getTask(task);
 	}
-	public interface UpdateTaskCallBack{
+
+	public interface UpdateTaskCallBack {
 		void getTask(Task task);
-		
+
 	}
-	
-	//TODO added just in case
-	private void generateDefaultTask(){
+
+	// TODO added just in case
+	private void generateDefaultTask() {
 		this.task = new Task();
 		task.setTitle("Default Task Title " + activity.numAsyncTasks);
 	}

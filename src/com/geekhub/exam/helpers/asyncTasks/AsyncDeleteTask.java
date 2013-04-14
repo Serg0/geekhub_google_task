@@ -20,6 +20,7 @@ import com.geekhub.exam.R;
 import com.geekhub.exam.R.string;
 import com.geekhub.exam.activities.MainActivity;
 import com.geekhub.exam.constants.Constants;
+import com.geekhub.exam.helpers.asyncTasks.CommonAsyncTask.ProgressBar;
 import com.geekhub.exam.utils.Utils;
 import com.google.api.services.tasks.model.Task;
 
@@ -38,53 +39,35 @@ public class AsyncDeleteTask extends CommonAsyncTask {
 	private DeleteTaskCallBack callBack;
 	private String taskListID = Constants.DEFAULT_KEY;
 	
-	AsyncDeleteTask(MainActivity activity, DeleteTaskCallBack callBack, List<Task> tasks) {
-		this(activity, callBack);
-		this.tasks = tasks;
-	}
-	
-	AsyncDeleteTask(MainActivity activity, DeleteTaskCallBack callBack, Task task) {
-		this(activity, callBack);
-		this.tasks = new ArrayList<Task>();
-		tasks.add(task);
-	}
-	
-	AsyncDeleteTask(MainActivity activity, DeleteTaskCallBack callBack, String taskListID, List<Task> tasks) {
-		this(activity, callBack);
+	AsyncDeleteTask(MainActivity activity,ProgressBar progress, DeleteTaskCallBack callBack, String taskListID, List<Task> tasks) {
+		this(activity, progress);
 		this.taskListID = taskListID;
 		this.tasks = tasks;
-	}
-	
-	AsyncDeleteTask(MainActivity activity, DeleteTaskCallBack callBack, String taskListID, Task task) {
-		this(activity, callBack);
-		this.taskListID = taskListID;
-		this.tasks = new ArrayList<Task>();
-		tasks.add(task);
-	}
-	
-	AsyncDeleteTask(MainActivity activity, DeleteTaskCallBack callBack) {
-		super(activity);
 		this.callBack = callBack;
+	}
+	
+	AsyncDeleteTask(MainActivity activity,ProgressBar progress, DeleteTaskCallBack callBack, String taskListID, Task task) {
+		this(activity, progress);
+		if(taskListID != null)
+			this.taskListID = taskListID;
+		this.tasks = new ArrayList<Task>();
+		tasks.add(task);
+		this.callBack = callBack;
+	}
+	
+	AsyncDeleteTask(MainActivity activity,ProgressBar progress) {
+		super(activity, progress);
 		
 	}
 
-//	@Override
 	protected void doInBackground() throws IOException{
-//		try {
+
 		for(Task task:tasks)
 				client.tasks().delete(taskListID, task.getId()).execute();
-			/*} catch (IOException e) {
-				String message = e.getMessage();
-				if(message != null)
-					Utils.showError(activity, message);
-				else
-					Utils.showError(activity, activity.getString(R.string.error_unknown_io_error));
-				e.printStackTrace();
-			}*/
 	}
 
-	public static void run(MainActivity tasksSample, DeleteTaskCallBack callBack, String taskListID, List<Task> tasks) {
-		new AsyncDeleteTask(tasksSample, callBack, taskListID, tasks).execute();
+	public static void run(MainActivity activity,ProgressBar progress, DeleteTaskCallBack callBack, String taskListID, List<Task> tasks) {
+		new AsyncDeleteTask(activity, progress, callBack, taskListID, tasks).execute();
 	}
 
 	@Override

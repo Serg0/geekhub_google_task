@@ -1,5 +1,4 @@
 
-
 /*
  * Copyright (c) 2012 Google Inc.
  * 
@@ -40,44 +39,35 @@ public class AsyncLoadTasks extends CommonAsyncTask {
 	private List<Task> tasks;
 	private LoadTasksCallBack callBack;
 	private String taskListID = Constants.DEFAULT_KEY;
-	
-	AsyncLoadTasks(MainActivity activity, LoadTasksCallBack callBack, String taskListID) {
-		this(activity, callBack);
-		this.taskListID = taskListID;
-	}
-	AsyncLoadTasks(MainActivity activity, LoadTasksCallBack callBack) {
-		super(activity);
+
+	AsyncLoadTasks(MainActivity activity, ProgressBar progress,
+			LoadTasksCallBack callBack, String taskListID) {
+		super(activity, progress);
+		if(taskListID != null)
+			this.taskListID = taskListID;
 		this.callBack = callBack;
 	}
 
 	protected void doInBackground() throws IOException {
-//		try {
-			tasks = client.tasks().list(taskListID)
-					.setFields("items").execute().getItems();
-			/*Log.d(TAG_LOCAL, "tasks ");
-			Log.d(TAG_LOCAL, "tasks size" + tasks.size());*/
-	       
-			/*		} catch (IOException e) {
-			String message = e.getMessage();
-			if(message != null)
-				Utils.showError(activity, message);
-			else
-				Utils.showError(activity, activity.getString(R.string.error_unknown_io_error));
-			e.printStackTrace();
-		}*/
+		tasks = client.tasks().list(taskListID).setFields("items").execute()
+				.getItems();
+
 	}
 
-	public static void run(MainActivity tasksSample, LoadTasksCallBack callBack, String taskListID) {
-		new AsyncLoadTasks(tasksSample, callBack, taskListID).execute();
+	public static void run(MainActivity tasksSample, ProgressBar progress,
+			LoadTasksCallBack callBack, String taskListID) {
+		new AsyncLoadTasks(tasksSample, progress, callBack, taskListID)
+				.execute();
 	}
 
 	@Override
-	protected void onSuccess(){
-		if(callBack != null)
+	protected void onSuccess() {
+		if (callBack != null)
 			callBack.getTasks(tasks);
 	}
-	public interface LoadTasksCallBack{
+
+	public interface LoadTasksCallBack {
 		void getTasks(List<Task> tasks);
-		
+
 	}
 }

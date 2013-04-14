@@ -15,20 +15,32 @@ import android.widget.EditText;
 public class TaskDialog  extends DialogFragment{
 
 	 public interface DialogFinishListener {
-	        void onFinishDialogAddTask(Task task);
+	        void onFinishTaskDialog(Task task, int taskPos, int operationCode);
 	    }
 	    private DialogFinishListener mParent;
 	    private EditText 
 	    			mTaskTitle,
 	    			mTaskDesc;
 	    private Task task;
+		private int 
+					taskPos,
+					operationCode;
 
-	    public TaskDialog(DialogFinishListener parent, Task task) {
+	    public TaskDialog(DialogFinishListener parent, Task task, int taskPos, int operationCode) {
 	        mParent = parent;
 	        this.task = task;
+	        this.taskPos = taskPos;
+	        this.operationCode = operationCode;
 //	        setDialogType(DialogType.AlertDialog);
 	    }
 
+	    public TaskDialog(DialogFinishListener parent, int operationCode) {
+	        mParent = parent;
+	        this.taskPos = -1;
+	        this.operationCode = operationCode;
+//	        setDialogType(DialogType.AlertDialog);
+	    }
+	    
 	    @Override
 	    public AlertDialog onCreateDialog(Bundle savedInstanceState) {
 	        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
@@ -68,7 +80,7 @@ public class TaskDialog  extends DialogFragment{
 	                    	task.setTitle(mTaskTitle.getText().toString());
 	                    	task.setNotes(mTaskDesc.getText().toString());
 	                    	if(mParent!=null)
-	                    		mParent.onFinishDialogAddTask(task);
+	                    		mParent.onFinishTaskDialog(task, taskPos, operationCode);
 	                    }
 	                })
 	                .setNegativeButton(getString(android.R.string.cancel), new DialogInterface.OnClickListener() {

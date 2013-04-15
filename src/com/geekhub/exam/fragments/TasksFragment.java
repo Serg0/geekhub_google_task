@@ -13,12 +13,13 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemLongClickListener;
-import android.widget.AdapterView.OnItemSelectedListener;
+import android.widget.ArrayAdapter;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.Toast;
 
 import com.actionbarsherlock.app.ActionBar;
+import com.actionbarsherlock.app.ActionBar.OnNavigationListener;
 import com.actionbarsherlock.app.SherlockFragment;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuInflater;
@@ -32,15 +33,18 @@ import com.geekhub.exam.helpers.TaskListArrayAdapter.ListViewCheckedListener;
 import com.geekhub.exam.helpers.asyncTasks.AsyncAddTask;
 import com.geekhub.exam.helpers.asyncTasks.AsyncAddTask.AddTaskCallBack;
 import com.geekhub.exam.helpers.asyncTasks.AsyncDeleteTask;
+import com.geekhub.exam.helpers.asyncTasks.AsyncLoadTaskLists;
+import com.geekhub.exam.helpers.asyncTasks.AsyncLoadTaskLists.LoadTaskListsCallBack;
 import com.geekhub.exam.helpers.asyncTasks.AsyncLoadTasks;
 import com.geekhub.exam.helpers.asyncTasks.AsyncUpdateTask;
 import com.geekhub.exam.helpers.asyncTasks.CommonAsyncTask.ProgressBar;
 import com.geekhub.exam.helpers.dialogs.TaskDialog;
 import com.google.api.services.tasks.model.Task;
 import com.google.api.services.tasks.model.TaskList;
+import com.google.api.services.tasks.model.TaskLists;
 
 public class TasksFragment extends SherlockFragment
-implements TaskDialog.DialogFinishListener, MainActivity.RefreshCallBack, ProgressBar, ListViewCheckedListener{
+implements TaskDialog.DialogFinishListener, MainActivity.RefreshCallBack, ProgressBar, ListViewCheckedListener, OnNavigationListener{
 
 	private TaskListArrayAdapter adapter;
 	private ListView listView;
@@ -51,19 +55,13 @@ implements TaskDialog.DialogFinishListener, MainActivity.RefreshCallBack, Progre
 	private MenuItem add, delete, refresh;
 	private ActionBar actionBar;
 
-	public static final String TASKLIST_DEFAULT_NAME = "@default";
-
-	static String ID = TASKLIST_DEFAULT_NAME;
+	static String ID = Constants.DEFAULT_KEY;
 	static TaskList taskList;
-	
-	public TasksFragment getTasksFragment(TaskList taskList) {
-		if(taskList != null){
-			this.ID = taskList.getTitle();
-			this.taskList = taskList;
-		}
-		return new TasksFragment();
-	}
-	
+
+	public static Integer currentTaskListNumber = 0;
+	public static TaskLists taskLists;
+	public static List<String> taskListsTitles = new ArrayList<String>();
+
 	@Override
 	public void onCreate(Bundle savedInstanceState){
 		super.onCreate(savedInstanceState);
@@ -80,7 +78,7 @@ implements TaskDialog.DialogFinishListener, MainActivity.RefreshCallBack, Progre
 		add 		= menu.findItem(R.id.add);
 		delete 		= menu.findItem(R.id.delete);
 		refresh 	= menu.findItem(R.id.refresh);
-			
+
 		delete.setVisible(false);
 	}
 
@@ -96,12 +94,12 @@ implements TaskDialog.DialogFinishListener, MainActivity.RefreshCallBack, Progre
 			deleteTasksAsync();
 			return true;
 		}
-		
+
 		case R.id.share:{
 			performShareAction();
 			return true;
 		}
-		
+
 		/*case R.id.edit:{
 
 //			editTaskDialog(getChoosenSingleItemPos());
@@ -128,7 +126,7 @@ implements TaskDialog.DialogFinishListener, MainActivity.RefreshCallBack, Progre
 		return super.onOptionsItemSelected(item);
 	}
 
-	
+
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, 
@@ -140,20 +138,13 @@ implements TaskDialog.DialogFinishListener, MainActivity.RefreshCallBack, Progre
 	@Override
 	public void onActivityCreated(Bundle savedISnstanceState) {
 		super.onActivityCreated(savedISnstanceState);
+		getSherlockActivity().getSupportActionBar().setNavigationMode(getSherlockActivity().getSupportActionBar().NAVIGATION_MODE_LIST);
+
+		addDropdownMenu();
 		initViews();
+
 		loadTaskListAsync();
 		initActionBar();
-		/*		new Thread(new Runnable() {
-			@Override
-			public void run() {
-				try {
-					loadData();
-					updateUi();
-				} catch (IOException e) {
-					e.printStackTrace();
-				} 
-			}
-		}).start();*/
 	}
 
 
@@ -162,7 +153,7 @@ implements TaskDialog.DialogFinishListener, MainActivity.RefreshCallBack, Progre
 	private void initActionBar() {
 		actionBar = getSherlockActivity().getSupportActionBar();
 		actionBar.setTitle(getCurrentTaskList());
-		
+
 
 	}
 
@@ -231,7 +222,7 @@ implements TaskDialog.DialogFinishListener, MainActivity.RefreshCallBack, Progre
 		listView.setOnItemClickListener(onItemClickListener);
 		listView.addFooterView(lvFootterView);
 		lvFootterView.setVisibility(View.GONE);
-		
+
 		updateFooterState();
 		listView.setOnItemLongClickListener(onItemLongClickListener);
 	}
@@ -244,8 +235,8 @@ implements TaskDialog.DialogFinishListener, MainActivity.RefreshCallBack, Progre
 			Log.d(MainActivity.TAG, "adapter != null");
 		}else{
 			Log.d(MainActivity.TAG, "adapter == null");*/
-			setUpListViewAdapter();
-//		}
+		setUpListViewAdapter();
+		//		}
 		updateFooterState();
 		listView.clearChoices();
 		updateActionBar();
@@ -291,10 +282,10 @@ implements TaskDialog.DialogFinishListener, MainActivity.RefreshCallBack, Progre
 	}
 
 	private void editTaskDialog(int taskPos) {
-				
+
 		TaskDialog newTaskDialog = new TaskDialog(this, tasks.get(taskPos), taskPos, OperationCodes.UPDATE_TASK);
 		newTaskDialog.show(getFragmentManager(), getTag());
-		
+
 	}
 
 	@Override
@@ -312,7 +303,7 @@ implements TaskDialog.DialogFinishListener, MainActivity.RefreshCallBack, Progre
 		default:
 			break;
 		}
-		
+
 
 	}
 
@@ -391,16 +382,16 @@ implements TaskDialog.DialogFinishListener, MainActivity.RefreshCallBack, Progre
 			@Override
 			public void getTasks(List<Task> loadedTasks) {
 
-					unchekListView();
-					tasks.clear();
-					if (loadedTasks != null)
+				unchekListView();
+				tasks.clear();
+				if (loadedTasks != null)
 					tasks.addAll(loadedTasks);
-					Log.d(MainActivity.TAG, "Tasks loaded" + tasks.size());
-					updateUi();
+				Log.d(MainActivity.TAG, "Tasks loaded" + tasks.size());
+				updateUi();
 
 			}
 		};
-		
+
 		if(MainActivity.getInstance() !=null)
 			AsyncLoadTasks.run(MainActivity.getInstance(), this, callBack, getCurrentTaskList());
 
@@ -465,24 +456,24 @@ implements TaskDialog.DialogFinishListener, MainActivity.RefreshCallBack, Progre
 
 	@Override
 	public void refresh() {
-		
+
 		loadTaskListAsync();
-		
+
 	}
 
 	@Override
 	public void accountChanged() {
-//		tasks.clear();
+		//		tasks.clear();
 		loadTaskListAsync();
 	}
-	
+
 	@Override
 	public void onDestroy() {
 		if(MainActivity.getInstance() !=null)
 			MainActivity.getInstance().removeRefreshCallBack();
 		super.onDestroy();
 	}
-	
+
 	public void showProgressDialog(boolean show){
 
 		if(show){
@@ -492,8 +483,8 @@ implements TaskDialog.DialogFinishListener, MainActivity.RefreshCallBack, Progre
 			refresh.setActionView(null);
 			refresh.collapseActionView();
 		}
-			
-			
+
+
 	}
 
 	@Override
@@ -504,21 +495,21 @@ implements TaskDialog.DialogFinishListener, MainActivity.RefreshCallBack, Progre
 			task.setStatus(Constants.TASK_NEEDSACTION_KEY);
 			task.setCompleted(null);
 		}
-		
+
 		editTaskUpdate(task, position);
-		
+
 	}
-	
+
 	private void performShareAction() {
 
 		String shareString = generateShareString();
-		
+
 		Intent sharingIntent = new Intent(android.content.Intent.ACTION_SEND);
 		sharingIntent.setType("text/plain");
 		sharingIntent.putExtra(android.content.Intent.EXTRA_TEXT, shareString);
 		startActivity(Intent.createChooser(sharingIntent, "Share TaskList via"));
 
-		
+
 	}
 
 	private String generateShareString() {
@@ -527,18 +518,62 @@ implements TaskDialog.DialogFinishListener, MainActivity.RefreshCallBack, Progre
 		completed = "[v]";
 		incompeted = "[ ]";
 		String shareString = "";
-			shareString +="Task list:";
-			shareString +=taskList.getTitle()+"\n\n";
-			
-			for(Task task:tasks){
-				if(task.getStatus().equals(Constants.TASK_COMPLETED_KEY))
-					shareString += completed;
-				else
-					shareString += incompeted;
-				shareString+=" "+task.getTitle() + "\n";
-			}
-			shareString += "\n"+"published with GoogleTask\n"+"https://github.com/Serg0/geekhub_google_task";
+		shareString +="Task list:";
+		shareString +=taskList.getTitle()+"\n\n";
+
+		for(Task task:tasks){
+			if(task.getStatus().equals(Constants.TASK_COMPLETED_KEY))
+				shareString += completed;
+			else
+				shareString += incompeted;
+			shareString+=" "+task.getTitle() + "\n";
+		}
+		shareString += "\n"+"published with GoogleTask\n"+"https://github.com/Serg0/geekhub_google_task";
 		return shareString;
 	}
-	
+
+	private void addDropdownMenu() {
+		LoadTaskListsCallBack callBack = new LoadTaskListsCallBack() {
+
+			@Override
+			public void getTasks(TasksFragment fragment,TaskLists taskLists, final ArrayAdapter<String> adapter,List<String> taskListsTitles) {
+
+				TasksFragment.taskLists = taskLists;
+				TasksFragment.taskListsTitles = taskListsTitles;
+
+				MainActivity.getInstance().getSupportActionBar().setListNavigationCallbacks(adapter, fragment);
+				MainActivity.getInstance().getSupportActionBar().setSelectedNavigationItem(currentTaskListNumber);	
+				for (TaskList taskList : taskLists.getItems()) {
+					if(taskListsTitles.get(currentTaskListNumber) == taskList.getTitle()) {
+						TasksFragment.ID = taskList.getId();
+						break;
+					}
+				}
+			}
+		};
+
+		if(MainActivity.getInstance() !=null)
+			AsyncLoadTaskLists.run(MainActivity.getInstance(), this, callBack, this);
+		
+	}
+
+	@Override
+	public boolean onNavigationItemSelected(int itemPosition, long itemId) {
+		
+		currentTaskListNumber = itemPosition;
+		
+		for (TaskList taskList : taskLists.getItems()) {
+			if(taskListsTitles.get(currentTaskListNumber) == taskList.getTitle()) {
+				ID = taskList.getId();
+				break;
+			}		
+		}
+		
+		updateUi();
+		refresh();
+		
+		return false;
+		
+	}
+
 }

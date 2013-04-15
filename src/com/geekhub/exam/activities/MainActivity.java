@@ -48,7 +48,7 @@ import com.google.api.services.tasks.model.TaskList;
 import com.google.api.services.tasks.model.TaskLists;
 //import com.google.android.gms.common.GooglePlayServicesUtil;
 
-public final class MainActivity extends SherlockFragmentActivity implements OnNavigationListener {
+public final class MainActivity extends SherlockFragmentActivity {
 
 	private static final Level LOGGING_LEVEL = Level.ALL;
 
@@ -68,11 +68,11 @@ public final class MainActivity extends SherlockFragmentActivity implements OnNa
 
 	public GoogleAccountCredential credential;
 
-	public List<String> tasksList;
+//	public List<String> tasksList;
 
 	ArrayAdapter<String> adapter;
 
-	public static com.google.api.services.tasks.Tasks service;
+	public com.google.api.services.tasks.Tasks service;
 
 	public int numAsyncTasks;
 
@@ -216,62 +216,62 @@ public final class MainActivity extends SherlockFragmentActivity implements OnNa
 	}
 
 	private void startFragment() {
-		actionBar();
-		//		getSupportFragmentManager().beginTransaction().replace(R.id.list, new TasksFragment()).commit();
+//		actionBar();
+				getSupportFragmentManager().beginTransaction().replace(R.id.list, new TasksFragment()).commit();
 
 	}
-	private void actionBar() {
-		new Thread(){
-			public void run(){
-				try {
-					taskLists = service.tasklists().list().execute();
-					for (TaskList taskList : taskLists.getItems()) {
-						taskListsTitles.add(taskList.getTitle().toString());
-					}
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-				if (taskListsTitles.size() != 0)
-					setActionBar();
-			}
-		}.start();
-	}
-
-	public void setActionBar() {
-		final ArrayAdapter<String> adapter = new ArrayAdapter<String>(instance,	android.R.layout.simple_list_item_1, taskListsTitles);
-		adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-		instance.runOnUiThread(new Runnable() {
-			@Override
-			public void run() {	
-				String taskListID = TASKLIST_DEFAULT_NAME;
-				getSupportActionBar().setListNavigationCallbacks(adapter, instance);
-				getSupportActionBar().setSelectedNavigationItem(currentTaskListNumber);	
-				TaskList _taskList = null;
-				for (TaskList taskList : taskLists.getItems()) {
-					if(taskListsTitles.get(currentTaskListNumber) == taskList.getTitle())
-						taskListID = taskList.getId();
-				}
-				TasksFragment fr = new TasksFragment();
-				fr.getTasksFragment(_taskList);
-			}
-		});
-	}
-
-	@Override
-	public boolean onNavigationItemSelected(int itemPosition, long itemId) {
-		currentTaskListNumber = itemPosition;
-		String taskListID = TASKLIST_DEFAULT_NAME;
-		TaskList _taskList = null;
-		TasksFragment fr = new TasksFragment();
-		for (TaskList taskList : taskLists.getItems()) {
-			if(taskListsTitles.get(currentTaskListNumber) == taskList.getTitle())
-//				taskListID = taskList.getId();
-				_taskList = taskList;
-		}
-		fr.getTasksFragment(_taskList);
-		getSupportFragmentManager().beginTransaction().replace(R.id.list, fr).commit();
-		return false;
-	}
+//	private void actionBar() {
+//		new Thread(){
+//			public void run(){
+//				try {
+//					taskLists = service.tasklists().list().execute();
+//					for (TaskList taskList : taskLists.getItems()) {
+//						taskListsTitles.add(taskList.getTitle().toString());
+//					}
+//				} catch (IOException e) {
+//					e.printStackTrace();
+//				}
+//				if (taskListsTitles.size() != 0)
+//					setActionBar();
+//			}
+//		}.start();
+//	}
+//
+//	public void setActionBar() {
+//		final ArrayAdapter<String> adapter = new ArrayAdapter<String>(instance,	android.R.layout.simple_list_item_1, taskListsTitles);
+//		adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+//		instance.runOnUiThread(new Runnable() {
+//			@Override
+//			public void run() {	
+//				String taskListID = TASKLIST_DEFAULT_NAME;
+//				getSupportActionBar().setListNavigationCallbacks(adapter, instance);
+//				getSupportActionBar().setSelectedNavigationItem(currentTaskListNumber);	
+//				TaskList _taskList = null;
+//				for (TaskList taskList : taskLists.getItems()) {
+//					if(taskListsTitles.get(currentTaskListNumber) == taskList.getTitle())
+//						taskListID = taskList.getId();
+//				}
+//				TasksFragment fr = new TasksFragment();
+//				fr.getTasksFragment(_taskList);
+//			}
+//		});
+//	}
+//
+//	@Override
+//	public boolean onNavigationItemSelected(int itemPosition, long itemId) {
+//		currentTaskListNumber = itemPosition;
+//		String taskListID = TASKLIST_DEFAULT_NAME;
+//		TaskList _taskList = null;
+//		TasksFragment fr = new TasksFragment();
+//		for (TaskList taskList : taskLists.getItems()) {
+//			if(taskListsTitles.get(currentTaskListNumber) == taskList.getTitle())
+////				taskListID = taskList.getId();
+//				_taskList = taskList;
+//		}
+//		fr.getTasksFragment(_taskList);
+//		getSupportFragmentManager().beginTransaction().replace(R.id.list, fr).commit();
+//		return false;
+//	}
 	
 	private void sendAccountChanged(){
 		if(refreshCallBack != null)

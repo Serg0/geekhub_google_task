@@ -37,6 +37,7 @@ import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
 import com.geekhub.exam.R;
 import com.geekhub.exam.fragments.TasksFragment;
+import com.geekhub.exam.services.UpdateService;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.api.client.extensions.android.http.AndroidHttp;
 import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential;
@@ -94,7 +95,9 @@ public final class MainActivity extends SherlockFragmentActivity {
 		super.onCreate(savedInstanceState);
 		Logger.getLogger("com.google.api.client").setLevel(LOGGING_LEVEL);
 		setContentView(R.layout.activity_main);
-
+		Intent intent = new Intent(this, UpdateService.class);
+//		// стартуем сервис
+		startService(intent);
 		getSupportActionBar().setNavigationMode(getSupportActionBar().NAVIGATION_MODE_LIST);
 		instance = this;
 		// Google Accounts

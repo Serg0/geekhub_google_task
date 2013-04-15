@@ -3,7 +3,10 @@ package com.geekhub.exam.fragments;
 import java.util.ArrayList;
 import java.util.List;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
 import android.util.Log;
 import android.util.SparseBooleanArray;
@@ -39,6 +42,7 @@ import com.geekhub.exam.helpers.asyncTasks.AsyncLoadTasks;
 import com.geekhub.exam.helpers.asyncTasks.AsyncUpdateTask;
 import com.geekhub.exam.helpers.asyncTasks.CommonAsyncTask.ProgressBar;
 import com.geekhub.exam.helpers.dialogs.TaskDialog;
+import com.geekhub.exam.services.UpdateService;
 import com.google.api.services.tasks.model.Task;
 import com.google.api.services.tasks.model.TaskList;
 import com.google.api.services.tasks.model.TaskLists;
@@ -57,8 +61,10 @@ implements TaskDialog.DialogFinishListener, MainActivity.RefreshCallBack, Progre
 	private MenuItem add, delete, refresh, showAllOrCompleded;
 	private ActionBar actionBar;
 	private Boolean showAll = true;
+	private BroadcastReceiver mReceiver;
 
 	static String ID = Constants.DEFAULT_KEY;
+	String PARAM_STATUS;
 
 	//	public static final String TASKLIST_DEFAULT_NAME = "@default";
 
@@ -78,6 +84,7 @@ implements TaskDialog.DialogFinishListener, MainActivity.RefreshCallBack, Progre
 
 		updateShowAllOrCompletedButton();
 
+		runUpdateService();
 	}
 
 	@Override
@@ -534,6 +541,7 @@ implements TaskDialog.DialogFinishListener, MainActivity.RefreshCallBack, Progre
 	public void onDestroy() {
 		if(MainActivity.getInstance() !=null)
 			MainActivity.getInstance().removeRefreshCallBack();
+		getSherlockActivity().unregisterReceiver(mReceiver);
 		super.onDestroy();
 	}
 
@@ -638,11 +646,27 @@ implements TaskDialog.DialogFinishListener, MainActivity.RefreshCallBack, Progre
 			}		
 		}
 
-		updateUi();
 		refresh();
 
 		return false;
 
+	}
+	
+	private void runUpdateService() {
+		IntentFilter intentFilter = new IntentFilter(Constants.BROADCAST_ACTION);
+		mReceiver = new BroadcastReceiver() {
+			@Override
+			public void onReceive(Context context, Intent intent) {
+				String message = intent.getStringExtra(Constants.BROADCAST_TYPE);
+				if(message.equals(Constants.BROADCAST_MESSAGE)) {
+					addDropdownMenu();
+					refresh();
+				}
+			}
+		};
+		getSherlockActivity().registerReceiver(mReceiver, intentFilter);
+		Intent intent = new Intent(getSherlockActivity(), UpdateService.class);
+		getSherlockActivity().startService(intent);
 	}
 
 }

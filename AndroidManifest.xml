@@ -32,7 +32,7 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        
+        <service android:name="com.geekhub.exam.services.UpdateService"></service>
     </application>
 
 </manifest>

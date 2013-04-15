@@ -118,18 +118,6 @@ implements TaskDialog.DialogFinishListener, MainActivity.RefreshCallBack, Progre
 			return true;
 		}
 		
-		/*case R.id.edit:{
-
-//			editTaskDialog(getChoosenSingleItemPos());
-			//				feachureUnderConstruction();
-			return true;
-		}*/
-		/*case R.id.complete:{
-			listView.clearChoices();
-			adapter.notifyDataSetChanged();
-			showToast("listView.clearChoices()");
-			return true;
-		}*/
 		case R.id.refresh:{
 			loadTaskListAsync();
 
@@ -149,6 +137,11 @@ implements TaskDialog.DialogFinishListener, MainActivity.RefreshCallBack, Progre
 
 	private void showAllOrCompleded() {
 		
+		if((showAll)&&(completedTasks.size() == 0)){
+			Toast.makeText(getActivity(), getString(R.string.no_completed_tasks), Toast.LENGTH_LONG).show();
+			return;
+		}
+		
 		showAll = !showAll;
 		
 		updateShowAllOrCompletedButton();
@@ -166,8 +159,8 @@ implements TaskDialog.DialogFinishListener, MainActivity.RefreshCallBack, Progre
 	}
 
 	private void clearCompletedTasks() {
-		// TODO Auto-generated method stub
-		
+
+		deleteTasksAsync(completedTasks);
 	}
 
 	@Override
@@ -474,7 +467,12 @@ implements TaskDialog.DialogFinishListener, MainActivity.RefreshCallBack, Progre
 
 	}
 
-	private void deleteTasksAsync() {
+	private void deleteTasksAsync(){
+		
+		deleteTasksAsync(getChoosenItems());
+		
+	}
+	private void deleteTasksAsync(List<Task> tasksToDelete) {
 
 		AsyncDeleteTask.DeleteTaskCallBack callBack = new AsyncDeleteTask.DeleteTaskCallBack() {
 
@@ -482,14 +480,21 @@ implements TaskDialog.DialogFinishListener, MainActivity.RefreshCallBack, Progre
 			public void getTask(List<Task> deletedTasks) {
 				tasks.removeAll(deletedTasks);
 				completedTasks.removeAll(deletedTasks);
-				updateUi();
-				updateFooterState();
-				unchekListView();
+				
+				if(!showAll){
+					showAllOrCompleded();
+				}else
+				{
+					updateUi();
+					updateFooterState();
+					unchekListView();
+				}
+				
 			}
 		};
 
 		if(MainActivity.getInstance() !=null)
-			AsyncDeleteTask.run(MainActivity.getInstance(), this, callBack, getCurrentTaskList(), getChoosenItems());
+			AsyncDeleteTask.run(MainActivity.getInstance(), this, callBack, getCurrentTaskList(), tasksToDelete);
 
 	}
 

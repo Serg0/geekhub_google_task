@@ -1,31 +1,47 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android" >
-    
 
-    <item android:id="@+id/add"
+    <item
+        android:id="@+id/add"
         android:icon="@drawable/ic_add"
-        android:showAsAction="always" />
-    
-     <item android:id="@+id/delete"
+        android:showAsAction="always"/>
+    <item
+        android:id="@+id/delete"
         android:icon="@drawable/ic_delete"
-        android:showAsAction="always" />
-     
-     <item android:id="@+id/share"
+        android:showAsAction="always"/>
+    <item
+        android:id="@+id/share"
         android:icon="@drawable/ic_social"
-        android:showAsAction="always" />
-     
-     <item android:id="@+id/refresh"
+        android:showAsAction="always"/>
+    <item
+        android:id="@+id/refresh"
         android:icon="@drawable/ic_refresh"
-        android:showAsAction="always" />
-     
-     
-     
-     <!-- <item android:id="@+id/edit"
+        android:showAsAction="always"/>
+    
+    <item
+        android:icon="@drawable/ic_moreowerflow"
+        android:showAsAction="always"
+       >
+        <menu>
+            <item
+                android:id="@+id/clear_completed"
+                android:showAsAction="ifRoom|withText"
+                android:title="@string/clear_compleded"/>
+            <item
+                android:id="@+id/showAllOrCompleded"
+                android:showAsAction="ifRoom|withText"
+                android:title="@string/show_completed"/>
+        </menu>
+    </item>
+
+    <!--
+      <item android:id="@+id/edit"
         android:icon="@drawable/ic_edit"
         android:showAsAction="always" />
      
       <item android:id="@+id/complete"
         android:icon="@drawable/ic_complete"
-        android:showAsAction="always" /> -->
-    
+        android:showAsAction="always" />
+    -->
+
 </menu>

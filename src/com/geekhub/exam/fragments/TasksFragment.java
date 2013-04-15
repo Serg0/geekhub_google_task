@@ -44,13 +44,16 @@ implements TaskDialog.DialogFinishListener, MainActivity.RefreshCallBack, Progre
 
 	private TaskListArrayAdapter adapter;
 	private ListView listView;
-	private List<Task> tasks = new ArrayList<Task>();
+	private List<Task> 	tasks			= new ArrayList<Task>(),
+						completedTasks 	= new ArrayList<Task>();
 	private View view;
 	private LinearLayout lvFootterView;
 
-	private MenuItem add, delete, refresh;
+	private MenuItem add, delete, refresh, showAllOrCompleded;
 	private ActionBar actionBar;
 
+	private boolean showAll = true;
+	
 	public static final String TASKLIST_DEFAULT_NAME = "@default";
 
 	static String ID = TASKLIST_DEFAULT_NAME;
@@ -70,6 +73,8 @@ implements TaskDialog.DialogFinishListener, MainActivity.RefreshCallBack, Progre
 		setHasOptionsMenu(true);
 		if(MainActivity.getInstance() !=null)
 			MainActivity.getInstance().setRefreshCallBack(this);
+		
+		updateShowAllOrCompletedButton();
 
 	}
 
@@ -77,10 +82,11 @@ implements TaskDialog.DialogFinishListener, MainActivity.RefreshCallBack, Progre
 	public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
 		inflater.inflate(R.menu.task_list_menu, menu);
 
-		add 		= menu.findItem(R.id.add);
-		delete 		= menu.findItem(R.id.delete);
-		refresh 	= menu.findItem(R.id.refresh);
-			
+		add 				= menu.findItem(R.id.add);
+		delete 				= menu.findItem(R.id.delete);
+		refresh 			= menu.findItem(R.id.refresh);
+		showAllOrCompleded 	= menu.findItem(R.id.showAllOrCompleded);
+		
 		delete.setVisible(false);
 	}
 
@@ -99,6 +105,16 @@ implements TaskDialog.DialogFinishListener, MainActivity.RefreshCallBack, Progre
 		
 		case R.id.share:{
 			performShareAction();
+			return true;
+		}
+		
+		case R.id.clear_completed:{
+			clearCompletedTasks();
+			return true;
+		}
+		
+		case R.id.showAllOrCompleded:{
+			showAllOrCompleded();
 			return true;
 		}
 		
@@ -129,6 +145,30 @@ implements TaskDialog.DialogFinishListener, MainActivity.RefreshCallBack, Progre
 	}
 
 	
+
+
+	private void showAllOrCompleded() {
+		
+		showAll = !showAll;
+		
+		updateShowAllOrCompletedButton();
+		
+		updateUi();
+		
+	}
+	
+	private void updateShowAllOrCompletedButton(){
+		
+		if(!showAll)
+			showAllOrCompleded.setTitle(getString(R.string.show_all));
+		else
+			showAllOrCompleded.setTitle(getString(R.string.show_completed));
+	}
+
+	private void clearCompletedTasks() {
+		// TODO Auto-generated method stub
+		
+	}
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, 
@@ -210,7 +250,6 @@ implements TaskDialog.DialogFinishListener, MainActivity.RefreshCallBack, Progre
 
 	private void updateActionBar() {
 
-		//TODO implement correct check
 		int checkedPositions = getChoosenItemsCount();
 		Log.d(MainActivity.TAG, "checkedPositions = " + checkedPositions);
 		if(checkedPositions > 0){
@@ -264,8 +303,12 @@ implements TaskDialog.DialogFinishListener, MainActivity.RefreshCallBack, Progre
 		lvFootterView.setVisibility(footterVisibility);
 	}
 	private void setUpListViewAdapter() {
-
-		adapter = new TaskListArrayAdapter(getSherlockActivity(), tasks, this);
+		
+		if(showAll)
+			adapter = new TaskListArrayAdapter(getSherlockActivity(), tasks, this);
+		else
+			adapter = new TaskListArrayAdapter(getSherlockActivity(), completedTasks, this);
+		
 		listView.setAdapter(adapter);
 
 	}
@@ -317,7 +360,6 @@ implements TaskDialog.DialogFinishListener, MainActivity.RefreshCallBack, Progre
 	}
 
 	private String getCurrentTaskList(){
-		//TODO add get current tasklist processing
 		return ID;
 	}
 
@@ -393,8 +435,15 @@ implements TaskDialog.DialogFinishListener, MainActivity.RefreshCallBack, Progre
 
 					unchekListView();
 					tasks.clear();
-					if (loadedTasks != null)
-					tasks.addAll(loadedTasks);
+					if (loadedTasks != null){
+						tasks.addAll(loadedTasks);
+						for(Task task:tasks){
+							if(task.getStatus().equals(Constants.TASK_COMPLETED_KEY))
+								completedTasks.add(task);
+						}
+						
+					}
+					
 					Log.d(MainActivity.TAG, "Tasks loaded" + tasks.size());
 					updateUi();
 
@@ -417,8 +466,6 @@ implements TaskDialog.DialogFinishListener, MainActivity.RefreshCallBack, Progre
 				listView.clearChoices();
 
 
-				//				}
-
 			}
 		};
 
@@ -434,6 +481,7 @@ implements TaskDialog.DialogFinishListener, MainActivity.RefreshCallBack, Progre
 			@Override
 			public void getTask(List<Task> deletedTasks) {
 				tasks.removeAll(deletedTasks);
+				completedTasks.removeAll(deletedTasks);
 				updateUi();
 				updateFooterState();
 				unchekListView();
@@ -452,6 +500,10 @@ implements TaskDialog.DialogFinishListener, MainActivity.RefreshCallBack, Progre
 			@Override
 			public void getTask(Task task) {
 				tasks.set(taskPos, task);
+				if(task.getStatus().equals(Constants.TASK_COMPLETED_KEY))
+					completedTasks.add(task);
+				else
+					completedTasks.remove(task);
 				updateUi();
 				unchekListView();
 			}
@@ -528,7 +580,10 @@ implements TaskDialog.DialogFinishListener, MainActivity.RefreshCallBack, Progre
 		incompeted = "[ ]";
 		String shareString = "";
 			shareString +="Task list:";
-			shareString +=taskList.getTitle()+"\n\n";
+			if(taskList != null)
+				shareString +=taskList.getTitle();
+			
+			shareString +="\n\n";
 			
 			for(Task task:tasks){
 				if(task.getStatus().equals(Constants.TASK_COMPLETED_KEY))

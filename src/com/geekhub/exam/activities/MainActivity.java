@@ -216,11 +216,11 @@ public final class MainActivity extends SherlockFragmentActivity implements OnNa
 	}
 
 	private void startFragment() {
-		actionBar();
-		//		getSupportFragmentManager().beginTransaction().replace(R.id.list, new TasksFragment()).commit();
+//		actionBar();
+				getSupportFragmentManager().beginTransaction().replace(R.id.list, new TasksFragment()).commit();
 
 	}
-	private void actionBar() {
+/*	private void actionBar() {
 		new Thread(){
 			public void run(){
 				try {
@@ -255,7 +255,7 @@ public final class MainActivity extends SherlockFragmentActivity implements OnNa
 				fr.getTasksFragment(_taskList);
 			}
 		});
-	}
+	}*/
 
 	@Override
 	public boolean onNavigationItemSelected(int itemPosition, long itemId) {

@@ -58,7 +58,7 @@ implements TaskDialog.DialogFinishListener, MainActivity.RefreshCallBack, Progre
 	
 	public TasksFragment getTasksFragment(TaskList taskList) {
 		if(taskList != null){
-			this.ID = TASKLIST_DEFAULT_NAME;
+			this.ID = taskList.getTitle();
 			this.taskList = taskList;
 		}
 		return new TasksFragment();

@@ -1,7 +1,5 @@
 package com.geekhub.exam.helpers.asyncTasks;
 
-
-
 /*
  * Copyright (c) 2012 Google Inc.
  * 
@@ -16,7 +14,6 @@ package com.geekhub.exam.helpers.asyncTasks;
  * the License.
  */
 
-
 import com.geekhub.exam.R;
 import com.geekhub.exam.activities.MainActivity;
 import com.geekhub.exam.utils.Utils;
@@ -30,98 +27,133 @@ import android.util.Log;
 import android.view.View;
 
 import java.io.IOException;
+import java.net.ConnectException;
+
+import javax.net.ssl.SSLException;
 
 /**
- * Asynchronous task that also takes care of common needs, such as displaying progress,
- * authorization, exception handling, and notifying UI when operation succeeded.
+ * Asynchronous task that also takes care of common needs, such as displaying
+ * progress, authorization, exception handling, and notifying UI when operation
+ * succeeded.
  * 
  * @author Yaniv Inbar
  */
 public abstract class CommonAsyncTask extends AsyncTask<Void, Void, Boolean> {
 
-	final  MainActivity activity;
- 	final  com.google.api.services.tasks.Tasks client;
-// 	private ProgressDialog progressBar;
- 	protected String TAG = CommonAsyncTask.class.getSimpleName();
+	final MainActivity activity;
+	final com.google.api.services.tasks.Tasks client;
+	// private ProgressDialog progressBar;
+	protected String TAG = CommonAsyncTask.class.getSimpleName();
 	private ProgressBar progress;
 
-  CommonAsyncTask(MainActivity activity, ProgressBar progress) {
-    this.activity = activity;
-    client = activity.service;
-    this.progress = progress;
-   
-  }
+	CommonAsyncTask(MainActivity activity, ProgressBar progress) {
+		this.activity = activity;
+		client = activity.service;
+		this.progress = progress;
 
-  @Override
-  protected void onPreExecute() {
-    super.onPreExecute();
-    Log.d(TAG, getClass().getSimpleName() + "task started");
-    activity.numAsyncTasks++;
-    
-    if(progress != null)
-    	progress.showProgressDialog(true);
-   /* progressBar = ProgressDialog.show(activity, null,activity.getString(R.string.progress_dialog_processing),true, false);*/
-  }
+	}
 
-  @Override
-  protected final Boolean doInBackground(Void... ignored) {
-	  Log.d(TAG, "doInBackground");
-	  if(activity.credential.getSelectedAccountName() != null)
-    try {
-      doInBackground();
-      return true;
-    } catch (GooglePlayServicesAvailabilityIOException availabilityException) {
-    	Log.d(TAG, "error " + "GooglePlayServicesAvailabilityIOException e ");
-        Log.d(TAG, "error " + "GooglePlayServicesAvailabilityIOException e "+availabilityException.getMessage());
-      activity.showGooglePlayServicesAvailabilityErrorDialog(
-          availabilityException.getConnectionStatusCode());
-    } catch (UserRecoverableAuthIOException userRecoverableException) {
-    	 Log.d(TAG, "error " + "UserRecoverableAuthIOException e ");
-         Log.d(TAG, "error " + "userRecoverableException e "+userRecoverableException.getMessage());
-      activity.startActivityForResult(
-          userRecoverableException.getIntent(), MainActivity.REQUEST_AUTHORIZATION);
-    } catch (IOException e) {
-    	
-      Utils.logAndShow(activity, MainActivity.TAG, e);
-      Log.d(TAG, "error " + "IOException e ");
-      Log.d(TAG, "error " + "IOException e "+e.getMessage());
-    }
-    return false;
-  }
+	@Override
+	protected void onPreExecute() {
+		super.onPreExecute();
+		Log.d(TAG, getClass().getSimpleName() + "task started");
+		activity.numAsyncTasks++;
 
-  @Override
-  protected void onPostExecute(Boolean success) {
-    super.onPostExecute(success);
-    if (0 == --activity.numAsyncTasks) {
-    	  if(progress != null)
-    		  progress.showProgressDialog(false);
-    }
-    if (success) 
+		if (progress != null)
+			progress.showProgressDialog(true);
+		/*
+		 * progressBar = ProgressDialog.show(activity,
+		 * null,activity.getString(R.string.progress_dialog_processing),true,
+		 * false);
+		 */
+	}
+
+	@Override
+	protected final Boolean doInBackground(Void... ignored) {
+		Log.d(TAG, "doInBackground");
+
+		if (activity.credential.getSelectedAccountName() != null)
+			try {
+				doInBackground();
+				return true;
+			} catch (GooglePlayServicesAvailabilityIOException availabilityException) {
+				Log.d(TAG, "error "
+						+ "GooglePlayServicesAvailabilityIOException e ");
+				Log.d(TAG, "error "
+						+ "GooglePlayServicesAvailabilityIOException e "
+						+ availabilityException.getMessage());
+				activity.showGooglePlayServicesAvailabilityErrorDialog(availabilityException
+						.getConnectionStatusCode());
+			} catch (UserRecoverableAuthIOException userRecoverableException) {
+				Log.d(TAG, "error " + "UserRecoverableAuthIOException e ");
+				Log.d(TAG, "error " + "userRecoverableException e "
+						+ userRecoverableException.getMessage());
+				activity.startActivityForResult(
+						userRecoverableException.getIntent(),
+						MainActivity.REQUEST_AUTHORIZATION);
+			}catch (SSLException e) {
+				Log.d(TAG, "error " + "SSLException e ");
+				Log.d(TAG, "error " + "SSLException e " + e.getMessage());
+
+				Utils.logAndShowError(activity, MainActivity.TAG,
+						activity.getString(R.string.server_unavaliable));
+				
+			} catch (ConnectException e) {
+
+				Log.d(TAG, "error " + "ConnectException e ");
+				Log.d(TAG, "error " + "ConnectException e " + e.getMessage());
+
+				Utils.logAndShowError(activity, MainActivity.TAG,
+						activity.getString(R.string.server_unavaliable));
+			} catch (IOException e) {
+
+				Log.d(TAG, "error " + "IOException e ");
+				Log.d(TAG, "error " + "IOException e " + e.getMessage());
+				Log.d(TAG,
+						"error " + "IOException e.toString() " + e.toString());
+
+				Utils.logAndShow(activity, MainActivity.TAG, e);
+
+			}
+		return false;
+	}
+
+	@Override
+	protected void onPostExecute(Boolean success) {
+		super.onPostExecute(success);
+		if (0 == --activity.numAsyncTasks) {
+			if (progress != null)
+				progress.showProgressDialog(false);
+		}
+		if (success)
 			onSuccess();
-  }
+	}
 
-  @Override
+	@Override
 	protected void finalize() throws Throwable {
-	 /* if(progress != null)
-		  progress.showProgressDialog(false);*/
-	  Log.d(TAG, "Task finalized");
+		/*
+		 * if(progress != null) progress.showProgressDialog(false);
+		 */
+		Log.d(TAG, "Task finalized");
 		super.finalize();
 	}
-  
-  @Override
+
+	@Override
 	protected void onCancelled() {
-	 /* if(progress != null)
-		  progress.showProgressDialog(false);*/
-	  Log.d(TAG, "Task cancelled");
+		/*
+		 * if(progress != null) progress.showProgressDialog(false);
+		 */
+		Log.d(TAG, "Task cancelled");
 		super.onCancelled();
 	}
-  abstract protected void doInBackground() throws IOException;
-  abstract protected void onSuccess();
-  
-  public interface ProgressBar{
+
+	abstract protected void doInBackground() throws IOException;
+
+	abstract protected void onSuccess();
+
+	public interface ProgressBar {
 		void showProgressDialog(boolean show);
-		
-  }
-  
-  
+
+	}
+
 }

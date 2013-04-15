@@ -46,10 +46,11 @@ import com.google.api.services.tasks.model.TaskLists;
 public class TasksFragment extends SherlockFragment
 implements TaskDialog.DialogFinishListener, MainActivity.RefreshCallBack, ProgressBar, ListViewCheckedListener, OnNavigationListener{
 
+	private TasksFragment fragment;
 	private TaskListArrayAdapter adapter;
 	private ListView listView;
 	private List<Task> 	tasks			= new ArrayList<Task>(),
-						completedTasks 	= new ArrayList<Task>();
+			completedTasks 	= new ArrayList<Task>();
 	private View view;
 	private LinearLayout lvFootterView;
 
@@ -58,15 +59,15 @@ implements TaskDialog.DialogFinishListener, MainActivity.RefreshCallBack, Progre
 	private Boolean showAll = true;
 
 	static String ID = Constants.DEFAULT_KEY;
-	
-//	public static final String TASKLIST_DEFAULT_NAME = "@default";
+
+	//	public static final String TASKLIST_DEFAULT_NAME = "@default";
 
 	static TaskList taskList;
-	
 
 	public static Integer currentTaskListNumber = 0;
-	public static TaskLists taskLists;
-	public static List<String> taskListsTitles = new ArrayList<String>();
+	private static TaskLists taskLists;
+	private static List<String> taskListsTitles = new ArrayList<String>();
+	private ArrayAdapter<String> menuAdapter;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState){
@@ -74,7 +75,7 @@ implements TaskDialog.DialogFinishListener, MainActivity.RefreshCallBack, Progre
 		setHasOptionsMenu(true);
 		if(MainActivity.getInstance() !=null)
 			MainActivity.getInstance().setRefreshCallBack(this);
-		
+
 		updateShowAllOrCompletedButton();
 
 	}
@@ -113,12 +114,12 @@ implements TaskDialog.DialogFinishListener, MainActivity.RefreshCallBack, Progre
 			clearCompletedTasks();
 			return true;
 		}
-		
+
 		case R.id.showAllOrCompleded:{
 			showAllOrCompleded();
 			return true;
 		}
-		
+
 		case R.id.refresh:{
 			loadTaskListAsync();
 
@@ -137,22 +138,22 @@ implements TaskDialog.DialogFinishListener, MainActivity.RefreshCallBack, Progre
 
 
 	private void showAllOrCompleded() {
-		
+
 		if((showAll)&&(completedTasks.size() == 0)){
 			Toast.makeText(getActivity(), getString(R.string.no_completed_tasks), Toast.LENGTH_LONG).show();
 			return;
 		}
-		
+
 		showAll  = !showAll;
-		
+
 		updateShowAllOrCompletedButton();
-		
+
 		updateUi();
-		
+
 	}
-	
+
 	private void updateShowAllOrCompletedButton(){
-		
+
 		if(!showAll)
 			showAllOrCompleded.setTitle(getString(R.string.show_all));
 		else
@@ -174,6 +175,7 @@ implements TaskDialog.DialogFinishListener, MainActivity.RefreshCallBack, Progre
 	@Override
 	public void onActivityCreated(Bundle savedISnstanceState) {
 		super.onActivityCreated(savedISnstanceState);
+		fragment = this;
 		getSherlockActivity().getSupportActionBar().setNavigationMode(getSherlockActivity().getSupportActionBar().NAVIGATION_MODE_LIST);
 
 		addDropdownMenu();
@@ -290,12 +292,12 @@ implements TaskDialog.DialogFinishListener, MainActivity.RefreshCallBack, Progre
 		lvFootterView.setVisibility(footterVisibility);
 	}
 	private void setUpListViewAdapter() {
-		
+
 		if(showAll)
 			adapter = new TaskListArrayAdapter(getSherlockActivity(), tasks, this);
 		else
 			adapter = new TaskListArrayAdapter(getSherlockActivity(), completedTasks, this);
-		
+
 		listView.setAdapter(adapter);
 
 	}
@@ -423,15 +425,15 @@ implements TaskDialog.DialogFinishListener, MainActivity.RefreshCallBack, Progre
 				unchekListView();
 				tasks.clear();
 				completedTasks.clear();
-					if (loadedTasks != null){
-						tasks.addAll(loadedTasks);
-						for(Task task:tasks){
-							if(task.getStatus().equals(Constants.TASK_COMPLETED_KEY))
-								completedTasks.add(task);
-						}
-						
+				if (loadedTasks != null){
+					tasks.addAll(loadedTasks);
+					for(Task task:tasks){
+						if(task.getStatus().equals(Constants.TASK_COMPLETED_KEY))
+							completedTasks.add(task);
 					}
-					
+
+				}
+
 				Log.d(MainActivity.TAG, "Tasks loaded" + tasks.size());
 				updateUi();
 
@@ -463,9 +465,9 @@ implements TaskDialog.DialogFinishListener, MainActivity.RefreshCallBack, Progre
 	}
 
 	private void deleteTasksAsync(){
-		
+
 		deleteTasksAsync(getChoosenItems());
-		
+
 	}
 	private void deleteTasksAsync(List<Task> tasksToDelete) {
 
@@ -475,7 +477,7 @@ implements TaskDialog.DialogFinishListener, MainActivity.RefreshCallBack, Progre
 			public void getTask(List<Task> deletedTasks) {
 				tasks.removeAll(deletedTasks);
 				completedTasks.removeAll(deletedTasks);
-				
+
 				if(!showAll){
 					showAllOrCompleded();
 				}else
@@ -484,7 +486,7 @@ implements TaskDialog.DialogFinishListener, MainActivity.RefreshCallBack, Progre
 					updateFooterState();
 					unchekListView();
 				}
-				
+
 			}
 		};
 
@@ -580,10 +582,10 @@ implements TaskDialog.DialogFinishListener, MainActivity.RefreshCallBack, Progre
 		incompeted = "[ ]";
 		String shareString = "";
 		shareString +="Task list:";
-			if(taskList != null)
-				shareString +=taskList.getTitle();
-			
-			shareString +="\n\n";
+		if(taskList != null)
+			shareString +=taskList.getTitle();
+
+		shareString +="\n\n";
 
 		for(Task task:tasks){
 			if(task.getStatus().equals(Constants.TASK_COMPLETED_KEY))
@@ -600,44 +602,47 @@ implements TaskDialog.DialogFinishListener, MainActivity.RefreshCallBack, Progre
 		LoadTaskListsCallBack callBack = new LoadTaskListsCallBack() {
 
 			@Override
-			public void getTasks(TasksFragment fragment,TaskLists taskLists, final ArrayAdapter<String> adapter,List<String> taskListsTitles) {
+			public void loadTaskLists(TaskLists localTaskLists, List<String> localTaskListsTitles) {
 
-				TasksFragment.taskLists = taskLists;
-				TasksFragment.taskListsTitles = taskListsTitles;
+				taskLists = localTaskLists;
+				taskListsTitles = localTaskListsTitles;
+				menuAdapter = new ArrayAdapter<String>(MainActivity.getInstance(),	android.R.layout.simple_list_item_1, taskListsTitles);
 
-				MainActivity.getInstance().getSupportActionBar().setListNavigationCallbacks(adapter, fragment);
-				MainActivity.getInstance().getSupportActionBar().setSelectedNavigationItem(currentTaskListNumber);	
-				for (TaskList taskList : taskLists.getItems()) {
-					if(taskListsTitles.get(currentTaskListNumber) == taskList.getTitle()) {
-						TasksFragment.ID = taskList.getId();
-						break;
+				if (taskListsTitles.size() != 0){	
+					MainActivity.getInstance().getSupportActionBar().setListNavigationCallbacks(menuAdapter, fragment);
+					MainActivity.getInstance().getSupportActionBar().setSelectedNavigationItem(currentTaskListNumber);	
+					for (TaskList taskList : localTaskLists.getItems()) {
+						if(taskListsTitles.get(currentTaskListNumber) == taskList.getTitle()) {
+							TasksFragment.ID = taskList.getId();
+							break;
+						}
 					}
 				}
 			}
 		};
 
 		if(MainActivity.getInstance() !=null)
-			AsyncLoadTaskLists.run(MainActivity.getInstance(), this, callBack, this);
-		
+			AsyncLoadTaskLists.run(MainActivity.getInstance(), this, callBack);
+
 	}
 
 	@Override
 	public boolean onNavigationItemSelected(int itemPosition, long itemId) {
-		
+
 		currentTaskListNumber = itemPosition;
-		
+
 		for (TaskList taskList : taskLists.getItems()) {
 			if(taskListsTitles.get(currentTaskListNumber) == taskList.getTitle()) {
 				ID = taskList.getId();
 				break;
 			}		
 		}
-		
+
 		updateUi();
 		refresh();
-		
+
 		return false;
-		
+
 	}
 
 }

@@ -36,14 +36,11 @@ public class AsyncLoadTaskLists extends CommonAsyncTask {
 	public TaskLists taskLists;
 	public List<String> taskListsTitles = new ArrayList<String>();
 
-	private TasksFragment fragment;
 	private LoadTaskListsCallBack callBack;
-	private ArrayAdapter<String> menuAdapter;
 
 	AsyncLoadTaskLists(MainActivity activity, ProgressBar progress,
-			LoadTaskListsCallBack callBack, TasksFragment tasksFfragment) {
+			LoadTaskListsCallBack callBack) {
 		super(activity, progress);
-		this.fragment = tasksFfragment;
 		this.callBack = callBack;
 	}
 
@@ -52,25 +49,21 @@ public class AsyncLoadTaskLists extends CommonAsyncTask {
 		for (TaskList taskList : taskLists.getItems()) {
 			taskListsTitles.add(taskList.getTitle().toString());
 		}
-		if (taskListsTitles.size() != 0){
-			menuAdapter = new ArrayAdapter<String>(activity,	android.R.layout.simple_list_item_1, taskListsTitles);
-			menuAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-		}
 	}
 
 	public static void run(MainActivity tasksSample, ProgressBar progress,
-			LoadTaskListsCallBack callBack, TasksFragment fragment) {
-		new AsyncLoadTaskLists(tasksSample, progress, callBack, fragment).execute();
+			LoadTaskListsCallBack callBack) {
+		new AsyncLoadTaskLists(tasksSample, progress, callBack).execute();
 	}
 
 	@Override
 	protected void onSuccess() {
 		if (callBack != null)
-			callBack.getTasks(fragment,taskLists, menuAdapter, taskListsTitles);
+			callBack.loadTaskLists(taskLists, taskListsTitles);
 	}
 
 	public interface LoadTaskListsCallBack {
-		void getTasks(TasksFragment taskFragment,TaskLists taskLists, ArrayAdapter<String> adapter, List<String> taskListsTitles);
+		void loadTaskLists(TaskLists localTaskLists,  List<String> taskListsTitles);
 
 	}
 }

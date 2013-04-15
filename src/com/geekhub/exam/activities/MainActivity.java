@@ -68,7 +68,7 @@ public final class MainActivity extends SherlockFragmentActivity {
 
 	public GoogleAccountCredential credential;
 
-//	public List<String> tasksList;
+	//	public List<String> tasksList;
 
 	ArrayAdapter<String> adapter;
 
@@ -84,7 +84,7 @@ public final class MainActivity extends SherlockFragmentActivity {
 	public TaskLists taskLists;
 
 	public static Integer currentTaskListNumber = 0;
-	
+
 	public List<String> taskListsTitles = new ArrayList<String>();
 
 	//	private ListView listView;
@@ -105,8 +105,8 @@ public final class MainActivity extends SherlockFragmentActivity {
 		// Tasks client
 		service = new com.google.api.services.tasks.Tasks.Builder(transport, jsonFactory, credential)
 		.setApplicationName("com.geekhub.exam").build();
-		
-		
+
+
 		Log.d(TAG, "Task client init");
 		startFragment();
 
@@ -216,86 +216,33 @@ public final class MainActivity extends SherlockFragmentActivity {
 	}
 
 	private void startFragment() {
-//		actionBar();
-				getSupportFragmentManager().beginTransaction().replace(R.id.list, new TasksFragment()).commit();
+		getSupportFragmentManager().beginTransaction().replace(R.id.list, new TasksFragment()).commit();
 
 	}
-//	private void actionBar() {
-//		new Thread(){
-//			public void run(){
-//				try {
-//					taskLists = service.tasklists().list().execute();
-//					for (TaskList taskList : taskLists.getItems()) {
-//						taskListsTitles.add(taskList.getTitle().toString());
-//					}
-//				} catch (IOException e) {
-//					e.printStackTrace();
-//				}
-//				if (taskListsTitles.size() != 0)
-//					setActionBar();
-//			}
-//		}.start();
-//	}
-//
-//	public void setActionBar() {
-//		final ArrayAdapter<String> adapter = new ArrayAdapter<String>(instance,	android.R.layout.simple_list_item_1, taskListsTitles);
-//		adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-//		instance.runOnUiThread(new Runnable() {
-//			@Override
-//			public void run() {	
-//				String taskListID = TASKLIST_DEFAULT_NAME;
-//				getSupportActionBar().setListNavigationCallbacks(adapter, instance);
-//				getSupportActionBar().setSelectedNavigationItem(currentTaskListNumber);	
-//				TaskList _taskList = null;
-//				for (TaskList taskList : taskLists.getItems()) {
-//					if(taskListsTitles.get(currentTaskListNumber) == taskList.getTitle())
-//						taskListID = taskList.getId();
-//				}
-//				TasksFragment fr = new TasksFragment();
-//				fr.getTasksFragment(_taskList);
-//			}
-//		});
-//	}
-//
-//	@Override
-//	public boolean onNavigationItemSelected(int itemPosition, long itemId) {
-//		currentTaskListNumber = itemPosition;
-//		String taskListID = TASKLIST_DEFAULT_NAME;
-//		TaskList _taskList = null;
-//		TasksFragment fr = new TasksFragment();
-//		for (TaskList taskList : taskLists.getItems()) {
-//			if(taskListsTitles.get(currentTaskListNumber) == taskList.getTitle())
-////				taskListID = taskList.getId();
-//				_taskList = taskList;
-//		}
-//		fr.getTasksFragment(_taskList);
-//		getSupportFragmentManager().beginTransaction().replace(R.id.list, fr).commit();
-//		return false;
-//	}
-	
+
 	private void sendAccountChanged(){
 		if(refreshCallBack != null)
 			refreshCallBack.accountChanged();
-		
+
 	}
 	private void sendRefreshNotification(){
-		
-		
+
+
 		//TODO temporary disabled to prevent overabundant downloads
 		/*if(refreshCallBack != null)
 			refreshCallBack.refresh();
-		*/
+		 */
 	}
 	public void setRefreshCallBack(RefreshCallBack refreshCallBack){
-		
+
 		this.refreshCallBack = refreshCallBack;
-		
+
 	}
-	
+
 	public void removeRefreshCallBack(){
-		
+
 		this.refreshCallBack = null;
-		
+
 	}
 
 	public interface RefreshCallBack{

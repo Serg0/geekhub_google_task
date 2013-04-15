@@ -26,5 +26,13 @@
     
     
    <string name="deleted_tag"><del>%s</del></string>
+   
+   <string name="clear_compleded">Delete completed tasks</string>
+   <string name="show_completed">Show completed only</string>
+   <string name="show_all">Show all tasks</string>
+   
+   <string name="no_completed_tasks">No completed tasks in this list.</string>
+    
+   <string name="server_unavaliable">Server is temporary unavalible.\n Try again later.</string>
     
 </resources>

@@ -282,6 +282,7 @@ implements TaskDialog.DialogFinishListener, MainActivity.RefreshCallBack,
 		listView.addFooterView(lvFootterView);
 		listView.setDropListener(this);
 		listView.setDragListener(this);
+		listView.setFooterDividersEnabled(false);
 		lvFootterView.setVisibility(View.GONE);
 
 		updateFooterState();
@@ -694,14 +695,17 @@ implements TaskDialog.DialogFinishListener, MainActivity.RefreshCallBack,
 	public void onDrop(int from, int to) {
 		
 		Task task, taskPrevious = null;
-//		Log.d(MainActivity.TAG, "from " + from +" to "+ to);
+		Log.d(MainActivity.TAG, "from " + from +" to "+ to);
 		task = tasks.get(from);
-		if(to>0&&to<=tasks.size()-1)
+		if(to>1&&to<=tasks.size()-1)
 			taskPrevious = tasks.get(to);
 				
 		moveAsyncTask(task, taskPrevious);
 		
 		tasks.remove(from);
+		/*if(from>to)
+			tasks.add(to-1,task);
+		else*/
 		tasks.add(to,task);
 		
 		

@@ -12,6 +12,7 @@ import android.util.Log;
 import android.util.SparseBooleanArray;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.View.OnDragListener;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
@@ -27,6 +28,10 @@ import com.actionbarsherlock.app.SherlockFragment;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuInflater;
 import com.actionbarsherlock.view.MenuItem;
+import com.ericharlow.DragNDrop.DragListener;
+import com.ericharlow.DragNDrop.DragNDropListView;
+import com.ericharlow.DragNDrop.DropListener;
+import com.ericharlow.DragNDrop.RemoveListener;
 import com.geekhub.exam.R;
 import com.geekhub.exam.activities.MainActivity;
 import com.geekhub.exam.constants.Constants;
@@ -39,6 +44,8 @@ import com.geekhub.exam.helpers.asyncTasks.AsyncDeleteTask;
 import com.geekhub.exam.helpers.asyncTasks.AsyncLoadTaskLists;
 import com.geekhub.exam.helpers.asyncTasks.AsyncLoadTaskLists.LoadTaskListsCallBack;
 import com.geekhub.exam.helpers.asyncTasks.AsyncLoadTasks;
+import com.geekhub.exam.helpers.asyncTasks.AsyncMoveTask;
+import com.geekhub.exam.helpers.asyncTasks.AsyncMoveTask.MoveTaskCallBack;
 import com.geekhub.exam.helpers.asyncTasks.AsyncUpdateTask;
 import com.geekhub.exam.helpers.asyncTasks.CommonAsyncTask.ProgressBar;
 import com.geekhub.exam.helpers.dialogs.TaskDialog;
@@ -48,11 +55,12 @@ import com.google.api.services.tasks.model.TaskList;
 import com.google.api.services.tasks.model.TaskLists;
 
 public class TasksFragment extends SherlockFragment
-implements TaskDialog.DialogFinishListener, MainActivity.RefreshCallBack, ProgressBar, ListViewCheckedListener, OnNavigationListener{
+implements TaskDialog.DialogFinishListener, MainActivity.RefreshCallBack, 
+	ProgressBar, ListViewCheckedListener, OnNavigationListener, DropListener, DragListener{
 
 	private TasksFragment fragment;
 	private TaskListArrayAdapter adapter;
-	private ListView listView;
+//	private ListView listView;
 	private List<Task> 	tasks			= new ArrayList<Task>(),
 			completedTasks 	= new ArrayList<Task>();
 	private View view;
@@ -62,6 +70,7 @@ implements TaskDialog.DialogFinishListener, MainActivity.RefreshCallBack, Progre
 	private ActionBar actionBar;
 	private Boolean showAll = true;
 	private BroadcastReceiver mReceiver;
+	private DragNDropListView listView;
 
 	static String ID = Constants.DEFAULT_KEY;
 	String PARAM_STATUS;
@@ -69,6 +78,8 @@ implements TaskDialog.DialogFinishListener, MainActivity.RefreshCallBack, Progre
 	//	public static final String TASKLIST_DEFAULT_NAME = "@default";
 
 	static TaskList taskList;
+
+	
 
 	public static Integer currentTaskListNumber = 0;
 	private static TaskLists taskLists;
@@ -227,6 +238,7 @@ implements TaskDialog.DialogFinishListener, MainActivity.RefreshCallBack, Progre
 		}
 
 	};
+	
 
 	/*private OnItemSelectedListener onItemSelectedListener = new OnItemSelectedListener() {
 
@@ -261,10 +273,15 @@ implements TaskDialog.DialogFinishListener, MainActivity.RefreshCallBack, Progre
 
 		lvFootterView = (LinearLayout) getView().inflate(getActivity(), R.layout.footter,null);
 
-		listView = (ListView) getView().findViewById(R.id.list_tasts);
+//		listView = (ListView) getView().findViewById(R.id.list_tasts);
+		
+		
+		listView = (DragNDropListView) getView().findViewById(R.id.list_tasts);
 		listView.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE);
 		listView.setOnItemClickListener(onItemClickListener);
 		listView.addFooterView(lvFootterView);
+		listView.setDropListener(this);
+		listView.setDragListener(this);
 		lvFootterView.setVisibility(View.GONE);
 
 		updateFooterState();
@@ -300,11 +317,15 @@ implements TaskDialog.DialogFinishListener, MainActivity.RefreshCallBack, Progre
 	}
 	private void setUpListViewAdapter() {
 
-		if(showAll)
-			adapter = new TaskListArrayAdapter(getSherlockActivity(), tasks, this);
-		else
-			adapter = new TaskListArrayAdapter(getSherlockActivity(), completedTasks, this);
+		if(showAll){
+			adapter = new TaskListArrayAdapter(getSherlockActivity(), tasks, this, true);
+			
+		}else
+		{
+			adapter = new TaskListArrayAdapter(getSherlockActivity(), completedTasks, this, false);
+		}
 
+		listView.setDragModeEnabled(showAll);
 		listView.setAdapter(adapter);
 
 	}
@@ -669,5 +690,58 @@ implements TaskDialog.DialogFinishListener, MainActivity.RefreshCallBack, Progre
 		getSherlockActivity().startService(intent);
 	}
 
+	@Override
+	public void onDrop(int from, int to) {
+		
+		Task task, taskPrevious = null;
+//		Log.d(MainActivity.TAG, "from " + from +" to "+ to);
+		task = tasks.get(from);
+		if(to>0&&to<=tasks.size()-1)
+			taskPrevious = tasks.get(to);
+				
+		moveAsyncTask(task, taskPrevious);
+		
+		tasks.remove(from);
+		tasks.add(to,task);
+		
+		
+		updateUi();
+		
+	}
+
+	@Override
+	public void onStartDrag(View itemView) {
+		itemView.setBackgroundColor(getResources().getColor(R.color.selected));
+		
+	}
+
+	@Override
+	public void onDrag(int x, int y, ListView listView) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void onStopDrag(View itemView) {
+		
+		itemView.setBackgroundColor(getResources().getColor(R.color.unselected));
+	}
+
+	private void moveAsyncTask(Task task, Task taskPrevious){
+
+		MoveTaskCallBack callBack = new MoveTaskCallBack() {
+
+			@Override
+			public void getTask(Task task) {
+				
+				listView.clearChoices();
+
+			}
+		};
+
+		if(MainActivity.getInstance() !=null)
+			AsyncMoveTask.run(MainActivity.getInstance(), this, callBack, getCurrentTaskList(), task, taskPrevious);
+
+	}
 }
 

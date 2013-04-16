@@ -5,12 +5,18 @@
     android:orientation="vertical"
     >
 
-    <ListView
+<!--     <ListView
         android:id="@+id/list_tasts"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:footerDividersEnabled="false" 
         android:choiceMode="multipleChoice" 
-        />
+        /> -->
+    
+    <com.ericharlow.DragNDrop.DragNDropListView
+  	android:id="@+id/list_tasts"
+	android:layout_width="fill_parent"
+    android:layout_height="fill_parent">
+  </com.ericharlow.DragNDrop.DragNDropListView>
 
 </LinearLayout>

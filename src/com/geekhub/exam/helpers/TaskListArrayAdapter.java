@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.ericharlow.DragNDrop.DropListener;
+import com.ericharlow.DragNDrop.RemoveListener;
 import com.geekhub.exam.R;
 import com.geekhub.exam.constants.Constants;
 
@@ -28,14 +30,16 @@ public class TaskListArrayAdapter extends ArrayAdapter<Task> {
 	private List<Task> tasks;
 	private Context context;
 	private ListViewCheckedListener checkedListener;
+	private boolean dragModeEnabled;
 	
-	public TaskListArrayAdapter(Context context, List<Task> tasks, ListViewCheckedListener checkedListener) {
+	public TaskListArrayAdapter(Context context, List<Task> tasks, ListViewCheckedListener checkedListener, boolean dragModeEnabled) {
 		super(context, R.layout.item, tasks);
 		if(tasks == null)
 			tasks = new ArrayList<Task>();
 		this.tasks = tasks;
 		this.context = context;
 		this.checkedListener = checkedListener;
+		this.dragModeEnabled = dragModeEnabled;
 	}
 	
 	@Override
@@ -69,7 +73,7 @@ public class TaskListArrayAdapter extends ArrayAdapter<Task> {
 		final Task task  = tasks.get(position);
 		String taskName =	task.getTitle();
 		Log.d("TaskListArrayAdapter", taskName);
-		Log.d("TaskListArrayAdapter", task.toString());
+		
 		if(task.getStatus().equals(Constants.TASK_COMPLETED_KEY)){
 			mainRow.setPaintFlags(checkbox.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
 			checkbox.setChecked(true);
@@ -88,7 +92,8 @@ public class TaskListArrayAdapter extends ArrayAdapter<Task> {
 			}
 		});
 		mainRow.setText(taskName);
-
+		if(!dragModeEnabled)
+			mainRow.setCompoundDrawables(null, null, null, null);
 				
 		return row;
 	}
@@ -96,5 +101,7 @@ public class TaskListArrayAdapter extends ArrayAdapter<Task> {
 	public interface ListViewCheckedListener{
 			void checkStateChanged(Task task, int pos, boolean isChecked);
 	}
+
+	
 	
 }

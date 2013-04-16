@@ -57,7 +57,6 @@ public class AsyncMoveTask extends CommonAsyncTask {
 		Move move = client.tasks().move(taskListID, task.getId());
 		if(taskPrevious != null)
 			move.setPrevious(taskPrevious.getId());
-		Log.d(TAG, getClass().getSimpleName() + "  move.getJsonContent();  "+ move.getJsonContent());
 		
 		task = move.execute();
 

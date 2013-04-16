@@ -73,7 +73,7 @@ public class TaskListArrayAdapter extends ArrayAdapter<Task> {
 		final Task task  = tasks.get(position);
 		String taskName =	task.getTitle();
 		Log.d("TaskListArrayAdapter", taskName);
-		Log.d("TaskListArrayAdapter", task.toString());
+		
 		if(task.getStatus().equals(Constants.TASK_COMPLETED_KEY)){
 			mainRow.setPaintFlags(checkbox.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
 			checkbox.setChecked(true);

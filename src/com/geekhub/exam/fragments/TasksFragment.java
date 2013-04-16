@@ -41,6 +41,8 @@ import com.geekhub.exam.helpers.asyncTasks.AsyncDeleteTask;
 import com.geekhub.exam.helpers.asyncTasks.AsyncLoadTaskLists;
 import com.geekhub.exam.helpers.asyncTasks.AsyncLoadTaskLists.LoadTaskListsCallBack;
 import com.geekhub.exam.helpers.asyncTasks.AsyncLoadTasks;
+import com.geekhub.exam.helpers.asyncTasks.AsyncMoveTask;
+import com.geekhub.exam.helpers.asyncTasks.AsyncMoveTask.MoveTaskCallBack;
 import com.geekhub.exam.helpers.asyncTasks.AsyncUpdateTask;
 import com.geekhub.exam.helpers.asyncTasks.CommonAsyncTask.ProgressBar;
 import com.geekhub.exam.helpers.dialogs.TaskDialog;
@@ -659,11 +661,11 @@ implements TaskDialog.DialogFinishListener, MainActivity.RefreshCallBack,
 	public void onDrop(int from, int to) {
 		
 		Task task, taskPrevious = null;
-		
+//		Log.d(MainActivity.TAG, "from " + from +" to "+ to);
 		task = tasks.get(from);
-		if(to>0&&to<tasks.size()-1)
+		if(to>0&&to<=tasks.size()-1)
 			taskPrevious = tasks.get(to);
-		
+				
 		moveAsyncTask(task, taskPrevious);
 		
 		tasks.remove(from);
@@ -694,20 +696,18 @@ implements TaskDialog.DialogFinishListener, MainActivity.RefreshCallBack,
 
 	private void moveAsyncTask(Task task, Task taskPrevious){
 
-		AddTaskCallBack callBack = new AddTaskCallBack() {
+		MoveTaskCallBack callBack = new MoveTaskCallBack() {
 
 			@Override
 			public void getTask(Task task) {
-				tasks.add(0, task);
-				updateUi();
+				
 				listView.clearChoices();
-
 
 			}
 		};
 
 		if(MainActivity.getInstance() !=null)
-			AsyncAddTask.run(MainActivity.getInstance(), this, callBack, getCurrentTaskList(), task);
+			AsyncMoveTask.run(MainActivity.getInstance(), this, callBack, getCurrentTaskList(), task, taskPrevious);
 
 	}
 }

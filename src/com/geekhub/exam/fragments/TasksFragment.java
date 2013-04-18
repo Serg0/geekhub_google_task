@@ -1,7 +1,6 @@
 package com.geekhub.exam.fragments;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import android.content.BroadcastReceiver;
@@ -13,7 +12,6 @@ import android.util.Log;
 import android.util.SparseBooleanArray;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.View.OnDragListener;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
@@ -32,7 +30,6 @@ import com.actionbarsherlock.view.MenuItem;
 import com.ericharlow.DragNDrop.DragListener;
 import com.ericharlow.DragNDrop.DragNDropListView;
 import com.ericharlow.DragNDrop.DropListener;
-import com.ericharlow.DragNDrop.RemoveListener;
 import com.geekhub.exam.R;
 import com.geekhub.exam.activities.MainActivity;
 import com.geekhub.exam.constants.Constants;
@@ -66,7 +63,7 @@ implements TaskDialog.DialogFinishListener, MainActivity.RefreshCallBack,
 	private View view;
 	private LinearLayout lvFootterView;
 
-	private MenuItem add, delete, refresh, showAllOrCompleded;
+	private MenuItem delete, refresh, showAllOrCompleded;
 	private ActionBar actionBar;
 	private Boolean showAll = true;
 	private BroadcastReceiver mReceiver;
@@ -75,11 +72,11 @@ implements TaskDialog.DialogFinishListener, MainActivity.RefreshCallBack,
 	static String ID = Constants.DEFAULT_KEY;
 	String PARAM_STATUS;
 
-	static TaskList taskList;
+	private TaskList taskList;
 
-	public static Integer currentTaskListNumber = 0;
-	private static List<TaskList> taskLists;
-	private static List<String> taskListsTitles = new ArrayList<String>();
+	public  int currentTaskListNumber = 0;
+	private List<TaskList> taskLists;
+	private List<String> taskListsTitles = new ArrayList<String>();
 	private ArrayAdapter<String> menuAdapter;
 
 	@Override
@@ -116,14 +113,13 @@ implements TaskDialog.DialogFinishListener, MainActivity.RefreshCallBack,
 
 	@Override
 	public void onSaveInstanceState(Bundle outState) {
-		// TODO Auto-generated method stub
 		super.onSaveInstanceState(outState);
 	}
+	
 	@Override
 	public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
 		inflater.inflate(R.menu.task_list_menu, menu);
 
-		add 				= menu.findItem(R.id.add);
 		delete 				= menu.findItem(R.id.delete);
 		refresh 			= menu.findItem(R.id.refresh);
 		showAllOrCompleded 	= menu.findItem(R.id.showAllOrCompleded);
@@ -133,17 +129,13 @@ implements TaskDialog.DialogFinishListener, MainActivity.RefreshCallBack,
 	
 	@Override
 	public void onResume() {
-		
-		
 			runUpdateService();
 		super.onResume();
 	}
 	
 	@Override
 	public void onPause() {
-		
 			getSherlockActivity().unregisterReceiver(mReceiver);
-		
 		super.onPause();
 	}
 	
@@ -155,6 +147,7 @@ implements TaskDialog.DialogFinishListener, MainActivity.RefreshCallBack,
 		
 		super.onDestroy();
 	}
+	
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		
@@ -235,8 +228,8 @@ implements TaskDialog.DialogFinishListener, MainActivity.RefreshCallBack,
 	private void initActionBar() {
 		
 		actionBar = getSherlockActivity().getSupportActionBar();
-		actionBar.setNavigationMode(getSherlockActivity().getSupportActionBar().NAVIGATION_MODE_LIST);
-		actionBar.setTitle(getCurrentTaskList());
+		actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_LIST);
+		actionBar.setTitle(getString(R.string.app_name));
 		
 	}
 
@@ -282,7 +275,7 @@ implements TaskDialog.DialogFinishListener, MainActivity.RefreshCallBack,
 	private void initViews() {
 
 
-		lvFootterView = (LinearLayout) getView().inflate(getActivity(), R.layout.footter,null);
+		lvFootterView = (LinearLayout) LinearLayout.inflate(getActivity(), R.layout.footter,null);
 
 		listView = (DragNDropListView) getView().findViewById(R.id.list_tasts);
 		listView.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE);
@@ -334,15 +327,6 @@ implements TaskDialog.DialogFinishListener, MainActivity.RefreshCallBack,
 
 	}
 
-	private void showToast(String toastText) {
-		Toast.makeText(getActivity(), toastText , Toast.LENGTH_SHORT).show();
-
-	}
-
-	private void feachureUnderConstruction() {
-		Toast.makeText(getActivity(), "Feachure is under constraction!" , Toast.LENGTH_SHORT).show();
-
-	}
 
 	private void addNewTaskDialog() {
 		TaskDialog newTaskDialog = new TaskDialog(this, OperationCodes.ADD_TASK);
@@ -435,7 +419,9 @@ implements TaskDialog.DialogFinishListener, MainActivity.RefreshCallBack,
 
 			@Override
 			public void getTasks(List<Task> loadedTasks) {
-
+				
+				/*if(loadedTasks == null)
+						return;*/
 				unchekListView();
 				tasks.clear();
 				completedTasks.clear();
@@ -446,7 +432,7 @@ implements TaskDialog.DialogFinishListener, MainActivity.RefreshCallBack,
 							completedTasks.add(task);
 					}
 
-				}
+				}else{}
 
 				Log.d(MainActivity.TAG, "Tasks loaded" + tasks.size());
 				updateUi();
@@ -465,6 +451,10 @@ implements TaskDialog.DialogFinishListener, MainActivity.RefreshCallBack,
 
 			@Override
 			public void getTask(Task task) {
+				
+				if(task == null)
+					return;
+				
 				tasks.add(0, task);
 				updateUi();
 				listView.clearChoices();
@@ -489,6 +479,10 @@ implements TaskDialog.DialogFinishListener, MainActivity.RefreshCallBack,
 
 			@Override
 			public void getTask(List<Task> deletedTasks) {
+				
+				if(deletedTasks == null)
+					return;
+				
 				tasks.removeAll(deletedTasks);
 				completedTasks.removeAll(deletedTasks);
 
@@ -515,6 +509,10 @@ implements TaskDialog.DialogFinishListener, MainActivity.RefreshCallBack,
 
 			@Override
 			public void getTask(Task task) {
+				
+				if(task == null)
+					return;
+				
 				tasks.set(taskPos, task);
 				if(task.getStatus().equals(Constants.TASK_COMPLETED_KEY))
 					completedTasks.add(task);
@@ -613,7 +611,8 @@ implements TaskDialog.DialogFinishListener, MainActivity.RefreshCallBack,
 			@Override
 			public void loadTaskLists(TaskLists localTaskLists) {
 
-				taskLists = localTaskLists.getItems();
+				if((localTaskLists	!= null)&&(localTaskLists.getItems() != null))
+					taskLists = localTaskLists.getItems();
 				
 
 				if ((taskLists == null)||(taskLists.size() == 0)){
@@ -631,15 +630,14 @@ implements TaskDialog.DialogFinishListener, MainActivity.RefreshCallBack,
 				}
 					menuAdapter = new ArrayAdapter<String>(MainActivity.getInstance(),	android.R.layout.simple_list_item_1, taskListsTitles);
 					MainActivity.getInstance().getSupportActionBar().setListNavigationCallbacks(menuAdapter, fragment);
-					MainActivity.getInstance().getSupportActionBar().setSelectedNavigationItem(currentTaskListNumber);	
-					for (TaskList taskList : localTaskLists.getItems()) {
+					/*MainActivity.getInstance().getSupportActionBar().setSelectedNavigationItem(currentTaskListNumber);	
+					for (TaskList taskList : taskLists) {
 						if(taskListsTitles.get(currentTaskListNumber) == taskList.getTitle()) {
 							TasksFragment.ID = taskList.getId();
 							break;
 						}
-					}
+					}*/
 				}
-//			}
 		};
 
 		if(MainActivity.getInstance() !=null)
@@ -655,6 +653,7 @@ implements TaskDialog.DialogFinishListener, MainActivity.RefreshCallBack,
 		for (TaskList taskList : taskLists) {
 			if(taskListsTitles.get(currentTaskListNumber) == taskList.getTitle()) {
 				ID = taskList.getId();
+				this.taskList = taskList;
 				break;
 			}		
 		}
@@ -690,6 +689,9 @@ implements TaskDialog.DialogFinishListener, MainActivity.RefreshCallBack,
 		
 		Task task, taskPrevious = null;
 		Log.d(MainActivity.TAG, "from " + from +" to "+ to);
+		if((tasks == null)||(tasks.size() == 0))
+			return;
+		
 		task = tasks.get(from);
 
 		tasks.remove(from);

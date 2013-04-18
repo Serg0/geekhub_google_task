@@ -19,11 +19,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import android.widget.ArrayAdapter;
-
 import com.geekhub.exam.activities.MainActivity;
-import com.geekhub.exam.fragments.TasksFragment;
-import com.google.api.services.tasks.model.TaskList;
 import com.google.api.services.tasks.model.TaskLists;
 
 /**

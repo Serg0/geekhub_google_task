@@ -15,7 +15,6 @@ package com.geekhub.exam.activities;
  */
 
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
@@ -31,7 +30,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.widget.ArrayAdapter;
 
-import com.actionbarsherlock.app.ActionBar.OnNavigationListener;
+import com.actionbarsherlock.app.ActionBar;
 import com.actionbarsherlock.app.SherlockFragmentActivity;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
@@ -98,7 +97,7 @@ public final class MainActivity extends SherlockFragmentActivity {
 		
 		Intent intent = new Intent(this, UpdateService.class);
 		startService(intent);
-		getSupportActionBar().setNavigationMode(getSupportActionBar().NAVIGATION_MODE_LIST);
+		getSupportActionBar().setNavigationMode(ActionBar.NAVIGATION_MODE_LIST);
 		instance = this;
 		// Google Accounts
 		credential = GoogleAccountCredential.usingOAuth2(this, TasksScopes.TASKS);

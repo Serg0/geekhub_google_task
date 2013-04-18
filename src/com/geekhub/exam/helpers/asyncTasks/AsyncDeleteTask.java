@@ -16,17 +16,13 @@
 
 package com.geekhub.exam.helpers.asyncTasks;
 
-import com.geekhub.exam.R;
-import com.geekhub.exam.R.string;
-import com.geekhub.exam.activities.MainActivity;
-import com.geekhub.exam.constants.Constants;
-import com.geekhub.exam.helpers.asyncTasks.CommonAsyncTask.ProgressBar;
-import com.geekhub.exam.utils.Utils;
-import com.google.api.services.tasks.model.Task;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+
+import com.geekhub.exam.activities.MainActivity;
+import com.geekhub.exam.constants.Constants;
+import com.google.api.services.tasks.model.Task;
 
 /**
  * Asynchronously load the tasks.

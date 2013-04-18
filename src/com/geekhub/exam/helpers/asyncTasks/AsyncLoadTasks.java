@@ -15,18 +15,12 @@
 
 package com.geekhub.exam.helpers.asyncTasks;
 
-import android.util.Log;
+import java.io.IOException;
+import java.util.List;
 
-import com.geekhub.exam.R;
-import com.geekhub.exam.R.string;
 import com.geekhub.exam.activities.MainActivity;
 import com.geekhub.exam.constants.Constants;
-import com.geekhub.exam.utils.Utils;
 import com.google.api.services.tasks.model.Task;
-
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Asynchronously load the tasks.
@@ -35,7 +29,6 @@ import java.util.List;
  */
 public class AsyncLoadTasks extends CommonAsyncTask {
 
-	private static final String TAG_LOCAL = "AsyncLoadTasks";
 	private List<Task> tasks;
 	private LoadTasksCallBack callBack;
 	private String taskListID = Constants.DEFAULT_KEY;

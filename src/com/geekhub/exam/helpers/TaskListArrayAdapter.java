@@ -1,13 +1,7 @@
 package com.geekhub.exam.helpers;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-
-import com.ericharlow.DragNDrop.DropListener;
-import com.ericharlow.DragNDrop.RemoveListener;
-import com.geekhub.exam.R;
-import com.geekhub.exam.constants.Constants;
 
 import android.content.Context;
 import android.graphics.Paint;
@@ -17,12 +11,12 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.CheckBox;
-import android.widget.CheckedTextView;
 import android.widget.CompoundButton;
 import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.TextView;
 
-import com.google.api.client.json.JsonFactory;
+import com.geekhub.exam.R;
+import com.geekhub.exam.constants.Constants;
 import com.google.api.services.tasks.model.Task;
 
 public class TaskListArrayAdapter extends ArrayAdapter<Task> {

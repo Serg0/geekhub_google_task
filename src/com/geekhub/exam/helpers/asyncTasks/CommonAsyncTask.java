@@ -14,22 +14,19 @@ package com.geekhub.exam.helpers.asyncTasks;
  * the License.
  */
 
+import java.io.IOException;
+import java.net.ConnectException;
+
+import javax.net.ssl.SSLException;
+
+import android.os.AsyncTask;
+import android.util.Log;
+
 import com.geekhub.exam.R;
 import com.geekhub.exam.activities.MainActivity;
 import com.geekhub.exam.utils.Utils;
 import com.google.api.client.googleapis.extensions.android.gms.auth.GooglePlayServicesAvailabilityIOException;
 import com.google.api.client.googleapis.extensions.android.gms.auth.UserRecoverableAuthIOException;
-import com.google.api.services.tasks.model.Task;
-
-import android.app.ProgressDialog;
-import android.os.AsyncTask;
-import android.util.Log;
-import android.view.View;
-
-import java.io.IOException;
-import java.net.ConnectException;
-
-import javax.net.ssl.SSLException;
 
 /**
  * Asynchronous task that also takes care of common needs, such as displaying
@@ -42,7 +39,6 @@ public abstract class CommonAsyncTask extends AsyncTask<Void, Void, Boolean> {
 
 	final MainActivity activity;
 	final com.google.api.services.tasks.Tasks client;
-	// private ProgressDialog progressBar;
 	protected String TAG = CommonAsyncTask.class.getSimpleName();
 	private ProgressBar progress;
 
@@ -61,11 +57,6 @@ public abstract class CommonAsyncTask extends AsyncTask<Void, Void, Boolean> {
 
 		if (progress != null)
 			progress.showProgressDialog(true);
-		/*
-		 * progressBar = ProgressDialog.show(activity,
-		 * null,activity.getString(R.string.progress_dialog_processing),true,
-		 * false);
-		 */
 	}
 
 	@Override
@@ -98,7 +89,12 @@ public abstract class CommonAsyncTask extends AsyncTask<Void, Void, Boolean> {
 				Utils.logAndShowError(activity, MainActivity.TAG,
 						activity.getString(R.string.server_unavaliable));
 				
-			} catch (ConnectException e) {
+			
+			}
+			/*}catch (java.net. e) {
+		
+			}*/ 
+			catch (ConnectException e) {
 
 				Log.d(TAG, "error " + "ConnectException e ");
 				Log.d(TAG, "error " + "ConnectException e " + e.getMessage());
@@ -133,18 +129,12 @@ public abstract class CommonAsyncTask extends AsyncTask<Void, Void, Boolean> {
 
 	@Override
 	protected void finalize() throws Throwable {
-		/*
-		 * if(progress != null) progress.showProgressDialog(false);
-		 */
 		Log.d(TAG, "Task finalized");
 		super.finalize();
 	}
 
 	@Override
 	protected void onCancelled() {
-		/*
-		 * if(progress != null) progress.showProgressDialog(false);
-		 */
 		Log.d(TAG, "Task cancelled");
 		super.onCancelled();
 	}

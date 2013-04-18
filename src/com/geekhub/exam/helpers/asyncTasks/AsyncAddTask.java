@@ -16,16 +16,11 @@
 
 package com.geekhub.exam.helpers.asyncTasks;
 
-import com.geekhub.exam.R;
-import com.geekhub.exam.R.string;
+import java.io.IOException;
+
 import com.geekhub.exam.activities.MainActivity;
 import com.geekhub.exam.constants.Constants;
-import com.geekhub.exam.utils.Utils;
 import com.google.api.services.tasks.model.Task;
-
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Asynchronously load the tasks.

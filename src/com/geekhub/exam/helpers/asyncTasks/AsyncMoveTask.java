@@ -15,20 +15,12 @@
 
 package com.geekhub.exam.helpers.asyncTasks;
 
-import android.util.Log;
+import java.io.IOException;
 
-import com.geekhub.exam.R;
-import com.geekhub.exam.R.string;
 import com.geekhub.exam.activities.MainActivity;
 import com.geekhub.exam.constants.Constants;
-import com.geekhub.exam.helpers.asyncTasks.CommonAsyncTask.ProgressBar;
-import com.geekhub.exam.utils.Utils;
 import com.google.api.services.tasks.Tasks.TasksOperations.Move;
 import com.google.api.services.tasks.model.Task;
-
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Asynchronously load the tasks.

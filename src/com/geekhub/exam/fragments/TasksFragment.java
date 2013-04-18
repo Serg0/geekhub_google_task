@@ -102,16 +102,23 @@ implements TaskDialog.DialogFinishListener, MainActivity.RefreshCallBack,
 		super.onActivityCreated(savedISnstanceState);
 		
 		fragment = this;
-		getSherlockActivity().getSupportActionBar().setNavigationMode(getSherlockActivity().getSupportActionBar().NAVIGATION_MODE_LIST);
+		
 
 		initViews();
 		initActionBar();
 		
 		if(MainActivity.getInstance() !=null)
 			MainActivity.getInstance().setRefreshCallBack(this);
-		refresh();
+		
+		if(savedISnstanceState == null)
+			refresh();
 	}
 
+	@Override
+	public void onSaveInstanceState(Bundle outState) {
+		// TODO Auto-generated method stub
+		super.onSaveInstanceState(outState);
+	}
 	@Override
 	public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
 		inflater.inflate(R.menu.task_list_menu, menu);
@@ -126,6 +133,7 @@ implements TaskDialog.DialogFinishListener, MainActivity.RefreshCallBack,
 	
 	@Override
 	public void onResume() {
+		
 		
 			runUpdateService();
 		super.onResume();
@@ -225,8 +233,11 @@ implements TaskDialog.DialogFinishListener, MainActivity.RefreshCallBack,
 
 
 	private void initActionBar() {
+		
 		actionBar = getSherlockActivity().getSupportActionBar();
+		actionBar.setNavigationMode(getSherlockActivity().getSupportActionBar().NAVIGATION_MODE_LIST);
 		actionBar.setTitle(getCurrentTaskList());
+		
 	}
 
 

@@ -70,4 +70,11 @@ public class AsyncLoadTasks extends CommonAsyncTask {
 		void getTasks(List<Task> tasks);
 
 	}
+	
+	@Override
+	protected void onFail() {
+		if (callBack != null)
+			callBack.getTasks(null);
+		
+	}
 }

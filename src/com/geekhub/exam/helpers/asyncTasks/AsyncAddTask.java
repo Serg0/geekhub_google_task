@@ -74,4 +74,11 @@ public class AsyncAddTask extends CommonAsyncTask {
 		this.task = new Task();
 		task.setTitle("Default Task Title " + activity.numAsyncTasks);
 	}
+	
+	@Override
+	protected void onFail() {
+		if (callBack != null)
+			callBack.getTask(null);
+		
+	}
 }

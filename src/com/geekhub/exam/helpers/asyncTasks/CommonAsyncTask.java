@@ -127,6 +127,8 @@ public abstract class CommonAsyncTask extends AsyncTask<Void, Void, Boolean> {
 		}
 		if (success)
 			onSuccess();
+		else
+			onFail();
 	}
 
 	@Override
@@ -150,6 +152,7 @@ public abstract class CommonAsyncTask extends AsyncTask<Void, Void, Boolean> {
 	abstract protected void doInBackground() throws IOException;
 
 	abstract protected void onSuccess();
+	abstract protected void onFail();
 
 	public interface ProgressBar {
 		void showProgressDialog(boolean show);

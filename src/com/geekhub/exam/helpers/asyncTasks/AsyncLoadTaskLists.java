@@ -46,9 +46,7 @@ public class AsyncLoadTaskLists extends CommonAsyncTask {
 
 	protected void doInBackground() throws IOException {
 		taskLists = activity.service.tasklists().list().execute();
-		for (TaskList taskList : taskLists.getItems()) {
-			taskListsTitles.add(taskList.getTitle().toString());
-		}
+		
 	}
 
 	public static void run(MainActivity tasksSample, ProgressBar progress,
@@ -59,11 +57,18 @@ public class AsyncLoadTaskLists extends CommonAsyncTask {
 	@Override
 	protected void onSuccess() {
 		if (callBack != null)
-			callBack.loadTaskLists(taskLists, taskListsTitles);
+			callBack.loadTaskLists(taskLists);
 	}
 
 	public interface LoadTaskListsCallBack {
-		void loadTaskLists(TaskLists localTaskLists,  List<String> taskListsTitles);
+		void loadTaskLists(TaskLists localTaskLists);
 
+	}
+	
+	@Override
+	protected void onFail() {
+		if (callBack != null)
+			callBack.loadTaskLists(null);
+		
 	}
 }

@@ -81,4 +81,11 @@ public class AsyncDeleteTask extends CommonAsyncTask {
 		
 	}
 	
+	@Override
+	protected void onFail() {
+		if (callBack != null)
+			callBack.getTask(null);
+		
+	}
+	
 	}

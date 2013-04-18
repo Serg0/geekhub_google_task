@@ -95,8 +95,8 @@ public final class MainActivity extends SherlockFragmentActivity {
 		super.onCreate(savedInstanceState);
 		Logger.getLogger("com.google.api.client").setLevel(LOGGING_LEVEL);
 		setContentView(R.layout.activity_main);
+		
 		Intent intent = new Intent(this, UpdateService.class);
-//		// стартуем сервис
 		startService(intent);
 		getSupportActionBar().setNavigationMode(getSupportActionBar().NAVIGATION_MODE_LIST);
 		instance = this;
@@ -105,16 +105,19 @@ public final class MainActivity extends SherlockFragmentActivity {
 		SharedPreferences settings = getPreferences(Context.MODE_PRIVATE);
 		credential.setSelectedAccountName(settings.getString(PREF_ACCOUNT_NAME, null));
 
-		// Tasks client
-		service = new com.google.api.services.tasks.Tasks.Builder(transport, jsonFactory, credential)
-		.setApplicationName("com.geekhub.exam").build();
-
+		initGoogleService();
 
 		Log.d(TAG, "Task client init");
 		startFragment();
 
 	}
 
+	private void initGoogleService(){
+		// Tasks client
+				service = new com.google.api.services.tasks.Tasks.Builder(transport, jsonFactory, credential)
+				.setApplicationName("com.geekhub.exam").build();
+
+	};
 	public static MainActivity getInstance(){
 		return instance;
 	}

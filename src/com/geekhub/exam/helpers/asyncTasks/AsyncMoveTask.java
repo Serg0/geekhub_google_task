@@ -79,5 +79,10 @@ public class AsyncMoveTask extends CommonAsyncTask {
 
 	}
 
-
+	@Override
+	protected void onFail() {
+		if (callBack != null)
+			callBack.getTask(null);
+		
+	}
 }

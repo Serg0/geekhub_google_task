@@ -93,7 +93,7 @@ implements TaskDialog.DialogFinishListener, MainActivity.RefreshCallBack,
 		if(MainActivity.getInstance() !=null)
 			MainActivity.getInstance().setRefreshCallBack(this);
 
-		updateShowAllOrCompletedButton();
+		
 
 		runUpdateService();
 	}
@@ -240,22 +240,6 @@ implements TaskDialog.DialogFinishListener, MainActivity.RefreshCallBack,
 	};
 	
 
-	/*private OnItemSelectedListener onItemSelectedListener = new OnItemSelectedListener() {
-
-		@Override
-		public void onItemSelected(AdapterView<?> arg0, View arg1,
-				int arg2, long arg3) {
-			updateActionBar();
-
-		}
-
-		@Override
-		public void onNothingSelected(AdapterView<?> arg0) {
-			updateActionBar();
-
-		}
-	};*/
-
 	private void updateActionBar() {
 
 		int checkedPositions = getChoosenItemsCount();
@@ -273,9 +257,6 @@ implements TaskDialog.DialogFinishListener, MainActivity.RefreshCallBack,
 
 		lvFootterView = (LinearLayout) getView().inflate(getActivity(), R.layout.footter,null);
 
-//		listView = (ListView) getView().findViewById(R.id.list_tasts);
-		
-		
 		listView = (DragNDropListView) getView().findViewById(R.id.list_tasts);
 		listView.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE);
 		listView.setOnItemClickListener(onItemClickListener);
@@ -288,6 +269,7 @@ implements TaskDialog.DialogFinishListener, MainActivity.RefreshCallBack,
 		updateFooterState();
 		listView.setOnItemLongClickListener(onItemLongClickListener);
 	}
+	
 	private void updateUi(){
 
 		//TODO temporary disabled due completed\incompleted representation bug on new task add
@@ -316,6 +298,7 @@ implements TaskDialog.DialogFinishListener, MainActivity.RefreshCallBack,
 
 		lvFootterView.setVisibility(footterVisibility);
 	}
+	
 	private void setUpListViewAdapter() {
 
 		if(showAll){
@@ -398,20 +381,6 @@ implements TaskDialog.DialogFinishListener, MainActivity.RefreshCallBack,
 		return tasks;
 	}
 
-	/*private int  getChoosenSingleItemPos(){
-
-		SparseBooleanArray sparseBooleanArray = listView.getCheckedItemPositions();
-		int cntChoice = listView.getCount();
-		for(int i = 0; i < cntChoice; ++i){
-
-			if(sparseBooleanArray.get(i)) {
-
-				return i;
-			}
-		}
-
-		return -1;
-	}*/
 	private int  getChoosenItemsCount(){
 		int conut = 0;
 		SparseBooleanArray sparseBooleanArray = listView.getCheckedItemPositions();
@@ -697,17 +666,20 @@ implements TaskDialog.DialogFinishListener, MainActivity.RefreshCallBack,
 		Task task, taskPrevious = null;
 		Log.d(MainActivity.TAG, "from " + from +" to "+ to);
 		task = tasks.get(from);
-		if(to>1&&to<=tasks.size()-1)
-			taskPrevious = tasks.get(to);
-				
+		
+		if(from>to){
+			tasks.remove(from);
+			tasks.add(to,task);
+		}else{
+			
+			tasks.remove(from);
+			tasks.add(to,task);
+		}
+		
+		if(to>0&&to<=tasks.size())
+			taskPrevious = tasks.get(to-1);
+		
 		moveAsyncTask(task, taskPrevious);
-		
-		tasks.remove(from);
-		/*if(from>to)
-			tasks.add(to-1,task);
-		else*/
-		tasks.add(to,task);
-		
 		
 		updateUi();
 		

@@ -544,14 +544,15 @@ implements TaskDialog.DialogFinishListener, MainActivity.RefreshCallBack,
 	
 	 
 	public void showProgressDialog(boolean show){
-
-		if(show){
-			refresh.setActionView(R.layout.progress_bar);
-			refresh.expandActionView();
-		}else{
-			refresh.setActionView(null);
-			refresh.collapseActionView();
-		}
+		
+		if(refresh != null)
+			if(show){
+				refresh.setActionView(R.layout.progress_bar);
+				refresh.expandActionView();
+			}else{
+				refresh.setActionView(null);
+				refresh.collapseActionView();
+			}
 
 
 	}

@@ -4,3 +4,6 @@
 [submodule "submodules/ActionBarSherlock"]
 	path = submodules/ActionBarSherlock
 	url = git@github.com:Serg0/ActionBarSherlock.git
+[submodule "submodules/DragNDropListView"]
+	path = submodules/DragNDropListView
+	url = https://github.com/Serg0/DragNDropListView.git

@@ -542,14 +542,15 @@ public class TasksFragment extends SherlockFragment implements
 	}
 
 	public void showProgressDialog(boolean show) {
-
+		
+		if(refresh != null)
 		if (show) {
-			refresh.setActionView(R.layout.progress_bar);
-			refresh.expandActionView();
-		} else {
-			refresh.setActionView(null);
-			refresh.collapseActionView();
-		}
+				refresh.setActionView(R.layout.progress_bar);
+				refresh.expandActionView();
+			}else{
+				refresh.setActionView(null);
+				refresh.collapseActionView();
+			}
 
 	}
 

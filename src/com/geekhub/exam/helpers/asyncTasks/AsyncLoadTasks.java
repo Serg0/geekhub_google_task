@@ -1,4 +1,3 @@
-
 /*
  * Copyright (c) 2012 Google Inc.
  * 
@@ -36,7 +35,7 @@ public class AsyncLoadTasks extends CommonAsyncTask {
 	AsyncLoadTasks(MainActivity activity, ProgressBar progress,
 			LoadTasksCallBack callBack, String taskListID) {
 		super(activity, progress);
-		if(taskListID != null)
+		if (taskListID != null)
 			this.taskListID = taskListID;
 		this.callBack = callBack;
 	}
@@ -63,11 +62,11 @@ public class AsyncLoadTasks extends CommonAsyncTask {
 		void getTasks(List<Task> tasks);
 
 	}
-	
+
 	@Override
 	protected void onFail() {
 		if (callBack != null)
 			callBack.getTasks(null);
-		
+
 	}
 }

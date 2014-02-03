@@ -1,4 +1,3 @@
-
 /*
  * Copyright (c) 2012 Google Inc.
  * 
@@ -22,11 +21,6 @@ import com.geekhub.exam.constants.Constants;
 import com.google.api.services.tasks.Tasks.TasksOperations.Move;
 import com.google.api.services.tasks.model.Task;
 
-/**
- * Asynchronously load the tasks.
- * 
- * @author Yaniv Inbar
- */
 public class AsyncMoveTask extends CommonAsyncTask {
 
 	private Task task, taskPrevious;
@@ -34,30 +28,32 @@ public class AsyncMoveTask extends CommonAsyncTask {
 	private String taskListID = Constants.DEFAULT_KEY;
 
 	AsyncMoveTask(MainActivity activity, ProgressBar progress,
-			MoveTaskCallBack callBack, String taskListID, Task task, Task taskPrevious) {
+			MoveTaskCallBack callBack, String taskListID, Task task,
+			Task taskPrevious) {
 		super(activity, progress);
-		if(taskListID != null)
+		if (taskListID != null)
 			this.taskListID = taskListID;
-		
+
 		this.task = task;
 		this.callBack = callBack;
 		this.taskPrevious = taskPrevious;
 	}
 
 	protected void doInBackground() throws IOException {
-		
+
 		Move move = client.tasks().move(taskListID, task.getId());
-		if(taskPrevious != null)
+		if (taskPrevious != null)
 			move.setPrevious(taskPrevious.getId());
-		
+
 		task = move.execute();
 
 	}
 
 	public static void run(MainActivity activity, ProgressBar progress,
-			MoveTaskCallBack callBack, String taskListID, Task task, Task taskPrevious) {
-		new AsyncMoveTask(activity, progress, callBack, taskListID, task, taskPrevious)
-				.execute();
+			MoveTaskCallBack callBack, String taskListID, Task task,
+			Task taskPrevious) {
+		new AsyncMoveTask(activity, progress, callBack, taskListID, task,
+				taskPrevious).execute();
 	}
 
 	@Override
@@ -75,6 +71,6 @@ public class AsyncMoveTask extends CommonAsyncTask {
 	protected void onFail() {
 		if (callBack != null)
 			callBack.getTask(null);
-		
+
 	}
 }

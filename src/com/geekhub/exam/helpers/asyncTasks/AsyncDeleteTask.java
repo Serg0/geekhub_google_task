@@ -1,5 +1,4 @@
 
-
 /*
  * Copyright (c) 2012 Google Inc.
  * 
@@ -24,64 +23,63 @@ import com.geekhub.exam.activities.MainActivity;
 import com.geekhub.exam.constants.Constants;
 import com.google.api.services.tasks.model.Task;
 
-/**
- * Asynchronously load the tasks.
- * 
- * @author Yaniv Inbar
- */
 public class AsyncDeleteTask extends CommonAsyncTask {
 
 	private List<Task> tasks;
 	private DeleteTaskCallBack callBack;
 	private String taskListID = Constants.DEFAULT_KEY;
-	
-	AsyncDeleteTask(MainActivity activity,ProgressBar progress, DeleteTaskCallBack callBack, String taskListID, List<Task> tasks) {
+
+	AsyncDeleteTask(MainActivity activity, ProgressBar progress,
+			DeleteTaskCallBack callBack, String taskListID, List<Task> tasks) {
 		this(activity, progress);
 		this.taskListID = taskListID;
 		this.tasks = tasks;
 		this.callBack = callBack;
 	}
-	
-	AsyncDeleteTask(MainActivity activity,ProgressBar progress, DeleteTaskCallBack callBack, String taskListID, Task task) {
+
+	AsyncDeleteTask(MainActivity activity, ProgressBar progress,
+			DeleteTaskCallBack callBack, String taskListID, Task task) {
 		this(activity, progress);
-		if(taskListID != null)
+		if (taskListID != null)
 			this.taskListID = taskListID;
 		this.tasks = new ArrayList<Task>();
 		tasks.add(task);
 		this.callBack = callBack;
 	}
-	
-	AsyncDeleteTask(MainActivity activity,ProgressBar progress) {
+
+	AsyncDeleteTask(MainActivity activity, ProgressBar progress) {
 		super(activity, progress);
-		
+
 	}
 
-	protected void doInBackground() throws IOException{
+	protected void doInBackground() throws IOException {
 
-		for(Task task:tasks)
-				client.tasks().delete(taskListID, task.getId()).execute();
+		for (Task task : tasks)
+			client.tasks().delete(taskListID, task.getId()).execute();
 	}
 
-	public static void run(MainActivity activity,ProgressBar progress, DeleteTaskCallBack callBack, String taskListID, List<Task> tasks) {
-		new AsyncDeleteTask(activity, progress, callBack, taskListID, tasks).execute();
+	public static void run(MainActivity activity, ProgressBar progress,
+			DeleteTaskCallBack callBack, String taskListID, List<Task> tasks) {
+		new AsyncDeleteTask(activity, progress, callBack, taskListID, tasks)
+				.execute();
 	}
 
 	@Override
 	protected void onSuccess() {
-		if(callBack != null)
+		if (callBack != null)
 			callBack.getTask(tasks);
 	}
-	
-	public interface DeleteTaskCallBack{
+
+	public interface DeleteTaskCallBack {
 		void getTask(List<Task> tasks);
-		
+
 	}
-	
+
 	@Override
 	protected void onFail() {
 		if (callBack != null)
 			callBack.getTask(null);
-		
+
 	}
-	
-	}
+
+}

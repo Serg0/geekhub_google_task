@@ -518,6 +518,7 @@ implements TaskDialog.DialogFinishListener, MainActivity.RefreshCallBack,
 					completedTasks.add(task);
 				else
 					completedTasks.remove(task);
+				
 				updateUi();
 				unchekListView();
 			}

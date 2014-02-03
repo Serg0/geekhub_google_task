@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    android:background="?activatedBackgroundIndicator"
+    android:gravity="center_vertical|fill_horizontal"
+    android:orientation="horizontal" >
+
+   <!--  android:background="@drawable/row_background" -->
+    <CheckBox 
+    android:id="@+id/checkbox"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_gravity="center_vertical"
+    android:clickable="true"
+    android:focusable="false"
+     />
+    
+    <TextView
+        android:id="@+id/mainRow"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:drawableRight="@drawable/icmpmove"
+        android:gravity="center_vertical"
+        android:text="Medium Text"
+        android:textAppearance="?android:attr/textAppearanceMedium" />
+
+    
+</LinearLayout>
+<!-- 	<?xml version="1.0" encoding="utf-8"?>
+	android:id="@+id/checkbox"
+	android:layout_width="wrap_content"
+	android:layout_height="wrap_content"
+	android:layout_gravity="center_vertical"
+	android:clickable="false"
+	android:duplicateParentState="true"
+	android:focusable="false" /> -->

@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">GoogleTasks</string>
+    <string name="hello_world">Hello world!</string>
+    <string name="menu_settings">Settings</string>
+	<string name="accounts">Accounts</string>
+    <string name="icon_desc">Application icon</string>
+    <string name="title_separator_desc">Title separator</string>
+    <string name="refresh">Refresh</string>
+    <string name="error">Error</string>
+    <string name="error_format">[Error] %s</string>
+    <string name="et_hint_enter_task_name">Enter Task name</string>
+    <string name="et_hint_enter_task_desc">Enter Task description</string>
+    
+     <string name="et_label_task_name">Task name:</string>
+      <string name="et_label_task_desc">Description:</string>
+      
+    <string name="title_task_create">Creating new Task</string>
+    <string name="title_task_edit">Edit Task</string>
+    
+    <string name="progress_dialog_processing">Processing..</string>
+    <string name="error_unknown_io_error">Unknown IO error</string>
+    
+    <string name="message_no_tasks">There no tasks in this list.\nPress \"+\" to add one.</string>
+    
+    
+   <string name="deleted_tag"><del>%s</del></string>
+   
+   <string name="clear_compleded">Delete completed tasks</string>
+   <string name="show_completed">Show completed only</string>
+   <string name="show_all">Show all tasks</string>
+   
+   <string name="no_completed_tasks">No completed tasks in this list.</string>
+    
+   <string name="server_unavaliable">Server is temporary unavalible.\n Try again later.</string>
+    
+</resources>

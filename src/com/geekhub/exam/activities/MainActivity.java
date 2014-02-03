@@ -14,7 +14,6 @@ package com.geekhub.exam.activities;
  * the License.
  */
 
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
@@ -35,18 +34,18 @@ import com.actionbarsherlock.app.SherlockFragmentActivity;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
 import com.geekhub.exam.R;
+import com.geekhub.exam.constants.Constants;
 import com.geekhub.exam.fragments.TasksFragment;
 import com.geekhub.exam.services.UpdateService;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.api.client.extensions.android.http.AndroidHttp;
 import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential;
+import com.google.api.client.googleapis.services.CommonGoogleClientRequestInitializer;
 import com.google.api.client.http.HttpTransport;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.gson.GsonFactory;
 import com.google.api.services.tasks.TasksScopes;
-import com.google.api.services.tasks.model.TaskList;
 import com.google.api.services.tasks.model.TaskLists;
-//import com.google.android.gms.common.GooglePlayServicesUtil;
 
 public final class MainActivity extends SherlockFragmentActivity {
 
@@ -68,8 +67,6 @@ public final class MainActivity extends SherlockFragmentActivity {
 
 	public GoogleAccountCredential credential;
 
-	//	public List<String> tasksList;
-
 	ArrayAdapter<String> adapter;
 
 	public com.google.api.services.tasks.Tasks service;
@@ -87,22 +84,23 @@ public final class MainActivity extends SherlockFragmentActivity {
 
 	public List<String> taskListsTitles = new ArrayList<String>();
 
-	//	private ListView listView;
-
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		Logger.getLogger("com.google.api.client").setLevel(LOGGING_LEVEL);
 		setContentView(R.layout.activity_main);
-		
+
 		Intent intent = new Intent(this, UpdateService.class);
 		startService(intent);
 		getSupportActionBar().setNavigationMode(ActionBar.NAVIGATION_MODE_LIST);
 		instance = this;
+
 		// Google Accounts
-		credential = GoogleAccountCredential.usingOAuth2(this, TasksScopes.TASKS);
+		credential = GoogleAccountCredential.usingOAuth2(this,
+				TasksScopes.TASKS);
 		SharedPreferences settings = getPreferences(Context.MODE_PRIVATE);
-		credential.setSelectedAccountName(settings.getString(PREF_ACCOUNT_NAME, null));
+		credential.setSelectedAccountName(settings.getString(PREF_ACCOUNT_NAME,
+				null));
 
 		initGoogleService();
 
@@ -111,21 +109,29 @@ public final class MainActivity extends SherlockFragmentActivity {
 
 	}
 
-	private void initGoogleService(){
+	private void initGoogleService() {
 		// Tasks client
-				service = new com.google.api.services.tasks.Tasks.Builder(transport, jsonFactory, credential)
-				.setApplicationName("com.geekhub.exam").build();
+		CommonGoogleClientRequestInitializer initializer = new CommonGoogleClientRequestInitializer(
+				Constants.GOOGLE_API_KEY);
+
+		service = new com.google.api.services.tasks.Tasks.Builder(transport,
+				jsonFactory, credential).setApplicationName("com.geekhub.exam")
+				.setGoogleClientRequestInitializer(initializer).build();
 
 	};
-	public static MainActivity getInstance(){
+
+	public static MainActivity getInstance() {
 		return instance;
 	}
 
-	public void showGooglePlayServicesAvailabilityErrorDialog(final int connectionStatusCode) {
+	public void showGooglePlayServicesAvailabilityErrorDialog(
+			final int connectionStatusCode) {
 		runOnUiThread(new Runnable() {
 			public void run() {
-				Log.d(TAG, "showGooglePlayServicesAvailabilityErrorDialog" + connectionStatusCode);
-				Dialog dialog = GooglePlayServicesUtil.getErrorDialog(connectionStatusCode, getInstance(),
+				Log.d(TAG, "showGooglePlayServicesAvailabilityErrorDialog"
+						+ connectionStatusCode);
+				Dialog dialog = GooglePlayServicesUtil.getErrorDialog(
+						connectionStatusCode, getInstance(),
 						REQUEST_GOOGLE_PLAY_SERVICES);
 				dialog.show();
 			}
@@ -145,7 +151,7 @@ public final class MainActivity extends SherlockFragmentActivity {
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		super.onActivityResult(requestCode, resultCode, data);
-		Log.d(TAG, "onActivityResult" + requestCode + " "+resultCode);
+		Log.d(TAG, "onActivityResult" + requestCode + " " + resultCode);
 		switch (requestCode) {
 		case REQUEST_GOOGLE_PLAY_SERVICES:
 			if (resultCode == Activity.RESULT_OK) {
@@ -162,8 +168,10 @@ public final class MainActivity extends SherlockFragmentActivity {
 			}
 			break;
 		case REQUEST_ACCOUNT_PICKER:
-			if (resultCode == Activity.RESULT_OK && data != null && data.getExtras() != null) {
-				String accountName = data.getExtras().getString(AccountManager.KEY_ACCOUNT_NAME);
+			if (resultCode == Activity.RESULT_OK && data != null
+					&& data.getExtras() != null) {
+				String accountName = data.getExtras().getString(
+						AccountManager.KEY_ACCOUNT_NAME);
 				if (accountName != null) {
 					credential.setSelectedAccountName(accountName);
 					SharedPreferences settings = getPreferences(Context.MODE_PRIVATE);
@@ -186,9 +194,7 @@ public final class MainActivity extends SherlockFragmentActivity {
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
-		/*case R.id.menu_refresh:
-			sendRefreshNotification();
-			break;*/
+
 		case R.id.menu_accounts:
 			chooseAccount();
 			return true;
@@ -198,7 +204,8 @@ public final class MainActivity extends SherlockFragmentActivity {
 
 	/** Check that Google Play services APK is installed and up to date. */
 	private boolean checkGooglePlayServicesAvailable() {
-		int connectionStatusCode = GooglePlayServicesUtil.isGooglePlayServicesAvailable(getApplicationContext());
+		int connectionStatusCode = GooglePlayServicesUtil
+				.isGooglePlayServicesAvailable(getApplicationContext());
 		if (GooglePlayServicesUtil.isUserRecoverableError(connectionStatusCode)) {
 			showGooglePlayServicesAvailabilityErrorDialog(connectionStatusCode);
 			return false;
@@ -217,40 +224,42 @@ public final class MainActivity extends SherlockFragmentActivity {
 	}
 
 	private void chooseAccount() {
-		startActivityForResult(credential.newChooseAccountIntent(), REQUEST_ACCOUNT_PICKER);
+		startActivityForResult(credential.newChooseAccountIntent(),
+				REQUEST_ACCOUNT_PICKER);
 	}
 
 	private void startFragment() {
-		getSupportFragmentManager().beginTransaction().replace(R.id.list, new TasksFragment()).commit();
+		getSupportFragmentManager().beginTransaction()
+				.replace(R.id.list, new TasksFragment()).commit();
 
 	}
 
-	private void sendAccountChanged(){
-		if(refreshCallBack != null)
+	private void sendAccountChanged() {
+		if (refreshCallBack != null)
 			refreshCallBack.accountChanged();
 
 	}
-	private void sendRefreshNotification(){
 
+	private void sendRefreshNotification() {
 
-		//TODO temporary disabled to prevent overabundant downloads
-		/*if(refreshCallBack != null)
+		if (refreshCallBack != null)
 			refreshCallBack.refresh();
-		 */
+
 	}
-	public void setRefreshCallBack(RefreshCallBack refreshCallBack){
+
+	public void setRefreshCallBack(RefreshCallBack refreshCallBack) {
 
 		this.refreshCallBack = refreshCallBack;
 
 	}
 
-	public void removeRefreshCallBack(){
+	public void removeRefreshCallBack() {
 
 		this.refreshCallBack = null;
 
 	}
 
-	public interface RefreshCallBack{
+	public interface RefreshCallBack {
 		public void refresh();
 		public void accountChanged();
 	};

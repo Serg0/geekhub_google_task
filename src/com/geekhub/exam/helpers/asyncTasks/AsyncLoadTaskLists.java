@@ -1,4 +1,3 @@
-
 /*
  * Copyright (c) 2012 Google Inc.
  * 
@@ -22,11 +21,6 @@ import java.util.List;
 import com.geekhub.exam.activities.MainActivity;
 import com.google.api.services.tasks.model.TaskLists;
 
-/**
- * Asynchronously load the tasks.
- * 
- * @author Yaniv Inbar
- */
 public class AsyncLoadTaskLists extends CommonAsyncTask {
 
 	public TaskLists taskLists;
@@ -42,7 +36,7 @@ public class AsyncLoadTaskLists extends CommonAsyncTask {
 
 	protected void doInBackground() throws IOException {
 		taskLists = activity.service.tasklists().list().execute();
-		
+
 	}
 
 	public static void run(MainActivity tasksSample, ProgressBar progress,
@@ -60,11 +54,11 @@ public class AsyncLoadTaskLists extends CommonAsyncTask {
 		void loadTaskLists(TaskLists localTaskLists);
 
 	}
-	
+
 	@Override
 	protected void onFail() {
 		if (callBack != null)
 			callBack.loadTaskLists(null);
-		
+
 	}
 }

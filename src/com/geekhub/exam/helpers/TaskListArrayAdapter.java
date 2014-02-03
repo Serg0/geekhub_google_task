@@ -96,6 +96,4 @@ public class TaskListArrayAdapter extends ArrayAdapter<Task> {
 			void checkStateChanged(Task task, int pos, boolean isChecked);
 	}
 
-	
-	
 }

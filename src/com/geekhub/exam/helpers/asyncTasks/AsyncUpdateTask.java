@@ -1,4 +1,3 @@
-
 /*
  * Copyright (c) 2012 Google Inc.
  * 
@@ -21,11 +20,6 @@ import com.geekhub.exam.activities.MainActivity;
 import com.geekhub.exam.constants.Constants;
 import com.google.api.services.tasks.model.Task;
 
-/**
- * Asynchronously load the tasks.
- * 
- * @author Yaniv Inbar
- */
 public class AsyncUpdateTask extends CommonAsyncTask {
 
 	private Task task;
@@ -35,7 +29,7 @@ public class AsyncUpdateTask extends CommonAsyncTask {
 	AsyncUpdateTask(MainActivity activity, ProgressBar progress,
 			UpdateTaskCallBack callBack, String taskListID, Task task) {
 		super(activity, progress);
-		if(taskListID != null)
+		if (taskListID != null)
 			this.taskListID = taskListID;
 		this.task = task;
 		this.callBack = callBack;
@@ -68,6 +62,6 @@ public class AsyncUpdateTask extends CommonAsyncTask {
 	protected void onFail() {
 		if (callBack != null)
 			callBack.getTask(null);
-		
+
 	}
 }
